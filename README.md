@@ -247,3 +247,50 @@ func isPrime(n int) bool {
 }
 
 ```
+
+# 7. Print factorial with recursive method
+
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import "fmt"
+
+func main() {
+	n := 5
+	fmt.Println("Factorial is :: ", fact(n))
+}
+
+func fact(n int) int {
+	if n == 0 || n == 1 {
+		return 1
+	}
+	return n * fact(n-1)
+}
+
+```
+
+# 8. Print fibonacci series with recursive method
+
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import "fmt"
+
+func main() {
+	for i := 0; i < 10; i++ {
+		fmt.Print(fibonacciSeries(i), " ")
+	}
+}
+
+func fibonacciSeries(n int) int {
+	if n < 2 {
+		return n
+	}
+	return fibonacciSeries(n-1) + fibonacciSeries(n-2)
+}
+
+```
