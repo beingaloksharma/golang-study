@@ -294,3 +294,53 @@ func fibonacciSeries(n int) int {
 }
 
 ```
+# 8. Print prime numbers from a array using channel
+
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	var wg sync.WaitGroup
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
+	primeNums := make(chan int)
+	for _, val := range arr {
+		wg.Add(1)
+		go PrimeNumbers(val, primeNums, &wg)
+	}
+	go func() {
+		wg.Wait()
+		close(primeNums)
+	}()
+
+	for n := range primeNums {
+		fmt.Println(n)
+	}
+}
+
+func PrimeNumbers(val int, ch chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if isPrime(val) {
+		ch <- val
+	}
+}
+
+func isPrime(n int) bool {
+	if n < 2 {
+		return false
+	}
+	for i := 2; i*i <= n; i++ {
+		if n%i == 0 {
+			return false
+		}
+	}
+	return true
+}
+
+```
