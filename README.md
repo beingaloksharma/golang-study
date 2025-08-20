@@ -203,3 +203,47 @@ func evenNums(oddCh, evenCh chan int, wg *sync.WaitGroup) {
 }
 
 ```
+
+# 6. Print prime numbers
+
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import "fmt"
+
+func main() {
+	num := 7
+	if isPrime(num) {
+		fmt.Println(num, " is prime number")
+	} else {
+		fmt.Println(num, " is not prime number")
+	}
+	var primeNumsCount int
+	var primeNums []int
+	start := 2
+	end := 10
+	for i := start; i <= end; i++ {
+		if isPrime(i) {
+			primeNumsCount += 1
+			primeNums = append(primeNums, i)
+		}
+	}
+	fmt.Println("Count of Prime Nums :: ", primeNumsCount)
+	fmt.Println("Prime Numbers are :: ", primeNums)
+}
+
+func isPrime(n int) bool {
+	if n < 2 {
+		return false
+	}
+	for i := 2; i*i <= n; i++ {
+		if n%i == 0 {
+			return false
+		}
+	}
+	return true
+}
+
+```
