@@ -344,3 +344,27 @@ func isPrime(n int) bool {
 }
 
 ```
+
+# 9. Write a program to Reverse of an array
+
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import "fmt"
+
+func main() {
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	fmt.Println("Array :: ", arr)
+	fmt.Println("Reverse of Array :: ", reverseArray(arr))
+}
+
+func reverseArray(arr []int) []int {
+	for i := 0; i < len(arr)/2; i++ {
+		arr[i], arr[len(arr)-i-1] = arr[len(arr)-i-1], arr[i]
+	}
+	return arr
+}
+
+```
