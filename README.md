@@ -368,3 +368,66 @@ func reverseArray(arr []int) []int {
 }
 
 ```
+
+# 9. Write a program to Remove duplicate value from an array/slice
+
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import "fmt"
+
+func main() {
+	arr := []int{1, 2, 3, 4, 5, 12, 3, 4, 5, 1, 2, 3, 4, 5, 12}
+	fmt.Println("Unique Values :: ", duplicateElements(arr))
+	fmt.Println("Duplicate Values :: ", duplicateElementsCount(arr))
+	for key, val := range duplicateElementsCount(arr) {
+		fmt.Println(key, " repeated :: ", val, " times")
+	}
+	fmt.Println("Duplicate Values :: ", duplicateElementsIndex(arr))
+	for key, val := range duplicateElementsIndex(arr) {
+		fmt.Println(key, " repeated Index :: ", val)
+	}
+}
+
+func duplicateElements(arr []int) []int {
+	var result []int
+	duplicate := make(map[int]bool)
+	for i := 0; i < len(arr); i++ {
+		if !duplicate[arr[i]] {
+			duplicate[arr[i]] = true
+			result = append(result, arr[i])
+		}
+	}
+	return result
+}
+
+func duplicateElementsCount(arr []int) map[int]int {
+	result := map[int]int{}
+	for i := 0; i < len(arr); i++ {
+		val, ok := result[arr[i]]
+		if ok {
+			result[arr[i]] = val + 1
+		} else {
+			result[arr[i]] = 1
+		}
+	}
+	return result
+}
+
+func duplicateElementsIndex(arr []int) map[int][]int {
+	result := map[int][]int{}
+	for i := 0; i < len(arr); i++ {
+		val, ok := result[arr[i]]
+		if ok {
+			val = append(val, i)
+			result[arr[i]] = val
+		} else {
+			result[arr[i]] = []int{i}
+		}
+	}
+	return result
+}
+
+```
