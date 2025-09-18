@@ -431,3 +431,42 @@ func duplicateElementsIndex(arr []int) map[int][]int {
 }
 
 ```
+
+# 10. Write a program to sort an Employee Struct based on their age. If age is same then sort based on their name.
+
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import (
+	"fmt"
+)
+
+type Employees struct {
+	Id   int
+	Name string
+	Age  int
+}
+
+func main() {
+	empData := []Employees{{1, "Alok", 19}, {2, "Sonam", 33}, {3, "Harshit", 33}, {4, "Satyendar", 28}}
+	fmt.Println(ManipulateEmpData(empData))
+}
+
+func ManipulateEmpData(emps []Employees) []Employees {
+	for i := 0; i < len(emps); i++ {
+		for j := i + 1; j < len(emps); j++ {
+			if emps[i].Age > emps[j].Age {
+				emps[i], emps[j] = emps[j], emps[i]
+			} else if emps[i].Age == emps[j].Age {
+				if emps[i].Name > emps[j].Name {
+					emps[i], emps[j] = emps[j], emps[i]
+				}
+			}
+		}
+	}
+	return emps
+}
+
+```
