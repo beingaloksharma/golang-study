@@ -470,3 +470,34 @@ func ManipulateEmpData(emps []Employees) []Employees {
 }
 
 ```
+
+# 10. Write a program to find the length of last word in string.
+
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import "fmt"
+
+func main() {
+	str := "Hello World                                                                                                                                          "
+	fmt.Println("Length of String is :: ", len(str))
+	fmt.Println("Length of last Word :: ", lastWordLength(str))
+}
+
+func lastWordLength(str string) int {
+	var length int
+	for i := len(str) - 1; i >= 0; i-- {
+		if str[i] == ' ' && length > 0 {
+			return length
+		} else {
+			if (str[i] >= 'A' && str[i] >= 'Z') || (str[i] >= 'a' && str[i] >= 'z') {
+				length = length + 1
+			}
+		}
+	}
+	return length
+}
+
+```
