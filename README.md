@@ -501,3 +501,60 @@ func lastWordLength(str string) int {
 }
 
 ```
+
+# 12. Write a program to calculate the sum of odd and even numbers using goroutines and channels.
+
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	var wg sync.WaitGroup
+	nums := []int{1, 2, 3, 4, 5}
+	oddNums := make(chan int)
+	evenNums := make(chan int)
+	wg.Add(3)
+	go findNumbers(nums, oddNums, evenNums, &wg)
+	go sumOfOddNums(oddNums, &wg)
+	go sumOfEvenNums(evenNums, &wg)
+	wg.Wait()
+}
+
+func findNumbers(nums []int, odd, even chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for _, val := range nums {
+		if val%2 == 0 {
+			even <- val
+		} else {
+			odd <- val
+		}
+	}
+	close(even)
+	close(odd)
+}
+
+func sumOfOddNums(odd chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	var sum int
+	for n := range odd {
+		sum = sum + n
+	}
+	fmt.Println("Sum of Odd Numbers :: ", sum)
+}
+
+func sumOfEvenNums(even chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	var sum int
+	for n := range even {
+		sum = sum + n
+	}
+	fmt.Println("Sum of Even Numbers :: ", sum)
+}
+
+```
