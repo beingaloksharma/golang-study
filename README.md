@@ -1,4 +1,3 @@
-
 # 1. Reverse of string and number
 
 ```go
