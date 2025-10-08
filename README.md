@@ -558,3 +558,56 @@ func sumOfEvenNums(even chan int, wg *sync.WaitGroup) {
 }
 
 ```
+
+# 13. Print the index of prime number using goroutines and channels.  
+
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	var wg sync.WaitGroup
+	primeIndex := make(chan int)
+	arr := []int{2, 4, 6, 7, 8, 11, 13, 17}
+	wg.Add(2)
+	go PrimeIndex(arr, primeIndex, &wg)
+	go PrintIndex(arr, primeIndex, &wg)
+	wg.Wait()
+}
+
+func PrimeIndex(arr []int, ch chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for i, val := range arr {
+		if isPrime(val) {
+			ch <- i
+		}
+	}
+	close(ch)
+}
+
+func PrintIndex(arr []int, ch chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for index := range ch {
+		fmt.Println("Prime Number :: ", arr[index], " index in Array is :: ", index)
+	}
+}
+
+func isPrime(n int) bool {
+	if n < 2 {
+		return false
+	}
+	for i := 2; i*i <= n; i++ {
+		if n%i == 0 {
+			return false
+		}
+	}
+	return true
+}
+
+```
