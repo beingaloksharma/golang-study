@@ -610,3 +610,19 @@ func isPrime(n int) bool {
 }
 
 ```
+
+# 14. What is difference between synchronous and asynchronous. How It can be implemented in golang with goroutines and channels. Explain it with an example.  
+
+<b>Synchronous programming</b> runs tasks one after another, with each task waiting for the previous one to finish—like following a recipe step-by-step. This makes the code predictable and simple to debug, but it can also lead to slowdowns if you have a task that takes a long time (like waiting for data from an external source).
+
+
+<b>Asynchronous programming</b> allows multiple tasks to start and run at the same time, without blocking each other—a bit like cooking several dishes simultaneously. The program doesn’t wait for one to finish before starting the next, leading to better performance and responsiveness, especially when tasks are slow or involve waiting (I/O, network requests).
+
+<b>In Go: Goroutines & Channels </b>  
+ - Goroutines let you run functions concurrently (asynchronously). Just put go in front of a function call.
+ - Channels let those goroutines communicate safely, sending and receiving values so you can coordinate when things are ready.
+
+<b> Typical workflow: </b> 
+ - Synchronous: task1(); task2(); task3(); — runs one-by-one.
+ - Asynchronous: go task1(); go task2(); go task3(); — all start at once, possibly finishing in any order.
+ - With channels, you can wait for results or synchronize tasks.
