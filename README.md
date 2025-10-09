@@ -626,3 +626,59 @@ func isPrime(n int) bool {
  - Synchronous: task1(); task2(); task3(); — runs one-by-one.
  - Asynchronous: go task1(); go task2(); go task3(); — all start at once, possibly finishing in any order.
  - With channels, you can wait for results or synchronize tasks.
+
+### Example
+
+<b> Synchronous Example </b>
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func task(name string) {
+	fmt.Println(name, "started")
+	time.Sleep(2 * time.Second) // simulate work
+	fmt.Println(name, "finished")
+}
+
+func main() {
+	task("Task 1")
+	task("Task 2")
+	fmt.Println("All tasks done synchronously")
+}
+
+```
+
+<b> Asynchronous Example </b>
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func task(name string, ch chan string) {
+	fmt.Println(name, "started")
+	time.Sleep(2 * time.Second) // simulate work
+	ch <- name + " finished"
+}
+
+func main() {
+	ch := make(chan string)
+	
+	go task("Task 1", ch)
+	go task("Task 2", ch)
+
+	// Wait for both tasks to send their results
+	for i := 0; i < 2; i++ {
+		fmt.Println(<-ch)
+	}
+
+	fmt.Println("All tasks done asynchronously")
+}
+
+```
