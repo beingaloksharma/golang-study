@@ -558,6 +558,57 @@ func sumOfEvenNums(even chan int, wg *sync.WaitGroup) {
 
 ```
 
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	var wg sync.WaitGroup
+	var oddSum, evenSum int
+	odd := make(chan int)
+	even := make(chan int)
+	nums := []int{1, 2, 3, 4, 5, 11, 20}
+	for _, val := range nums {
+		wg.Add(1)
+		go findNums(val, odd, even, &wg)
+	}
+	go func() {
+		for n := range odd {
+			oddSum = oddSum + n
+		}
+	}()
+	go func() {
+		for n := range even {
+			evenSum = evenSum + n
+		}
+	}()
+	wg.Wait()
+	go func() {
+		close(odd)
+		close(even)
+	}()
+
+	fmt.Println("Sum of Odd Numbers :: ", oddSum)
+	fmt.Println("Sum of Even Numbers :: ", evenSum)
+}
+
+func findNums(num int, odd, even chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if num%2 == 0 {
+		even <- num
+	} else {
+		odd <- num
+	}
+}
+
+```
+
 # 13. Print the index of prime number using goroutines and channels.  
 
 ```go
