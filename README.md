@@ -1,9 +1,38 @@
-# 1. Reverse of string and number
+# Golang Study Guide
+
+A collection of Go exercises and examples covering basics, data structures, algorithms, and concurrency.
+
+## Table of Contents
+
+- [Basics & Algorithms](#basics--algorithms)
+    - [Reverse String & Number](#reverse-string--number)
+    - [Prime Numbers Check & Range](#prime-numbers-check--range)
+    - [Factorial (Recursive)](#factorial-recursive)
+    - [Fibonacci Series (Recursive)](#fibonacci-series-recursive)
+    - [Length of Last Word](#length-of-last-word)
+- [Data Structures (Strings, Arrays, Maps)](#data-structures-strings-arrays-maps)
+    - [Count Vowels & Consonants (Built-in)](#count-vowels--consonants-built-in)
+    - [Count Vowels & Consonants (Custom)](#count-vowels--consonants-custom)
+    - [Reverse Array](#reverse-array)
+    - [Remove Duplicates from Slice](#remove-duplicates-from-slice)
+- [Structs & Sorting](#structs--sorting)
+    - [Sort Employees by Age & Name](#sort-employees-by-age--name)
+- [Concurrency (Goroutines & Channels)](#concurrency-goroutines--channels)
+    - [Odd/Even Numbers (Single Channel)](#oddeven-numbers-single-channel)
+    - [Odd/Even Numbers (Multiple Channels)](#oddeven-numbers-multiple-channels)
+    - [Sum of Odd/Even Numbers](#sum-of-oddeven-numbers)
+    - [Prime Numbers from Array](#prime-numbers-from-array)
+    - [Index of Prime Numbers](#index-of-prime-numbers)
+    - [Synchronous vs Asynchronous Concepts](#synchronous-vs-asynchronous-concepts)
+
+---
+
+## Basics & Algorithms
+
+### Reverse String & Number
+Checks if a string or number is a palindrome.
 
 ```go
-// You can edit this code!
-// Click here and start typing.
-
 package main
 
 import "fmt"
@@ -41,173 +70,12 @@ func numReverse(num int) int {
 	}
 	return rev
 }
-
 ```
 
-# 2. Count Vowel and Consonant using built-In function 
+### Prime Numbers Check & Range
+Checks if a single number is prime and finds all primes in a range.
 
 ```go
-// You can edit this code!
-// Click here and start typing.
-package main
-
-import (
-	"fmt"
-	"strings"
-	"unicode"
-)
-
-func main() {
-	str := "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*aeiouelephant"
-	var vowelCount int
-	var consonantCount int
-	for _, char := range str {
-		if unicode.IsLetter(char) {
-			if strings.ContainsRune("aeiou", char) {
-				vowelCount = vowelCount + 1
-			} else {
-				consonantCount = consonantCount + 1
-			}
-		}
-	}
-	fmt.Println("Vowels are :: ", vowelCount)
-	fmt.Println("Consonant are :: ", consonantCount)
-}
-
-```
-
-# 3.  Count Vowel and Consonant using custom function 
-
-```go
-// You can edit this code!
-// Click here and start typing.
-package main
-
-import "fmt"
-
-func main() {
-	str := "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*"
-	var vowel int
-	var consonant int
-	for _, char := range str {
-		if isLetter(char) {
-			if isVowel(char) {
-				vowel = vowel + 1
-			} else {
-				consonant = consonant + 1
-			}
-		}
-	}
-	fmt.Println("Vowel count :: ", vowel)
-	fmt.Println("Consonant count :: ", consonant)
-}
-
-func isLetter(char rune) bool {
-	return (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
-}
-
-func isVowel(char rune) bool {
-	return char == 'a' || char == 'e' || char == 'i' || char == 'o' || char == 'u' || char == 'A' || char == 'E' || char == 'I' || char == 'O' || char == 'U'
-}
-
-```
-
-# 4. Print even odd number using only one channel
-
-```go
-// You can edit this code!
-// Click here and start typing.
-package main
-
-import (
-	"fmt"
-	"sync"
-)
-
-func main() {
-	var wg sync.WaitGroup
-	ch := make(chan int)
-	wg.Add(2)
-	go oddNums(ch, &wg)
-	go evenNums(ch, &wg)
-	ch <- 1
-	wg.Wait()
-}
-
-func oddNums(ch chan int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	for n := range ch {
-		fmt.Println(n)
-		ch <- n + 1
-	}
-}
-
-func evenNums(ch chan int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	for n := range ch {
-		if n > 10 {
-			close(ch)
-			return
-		} else {
-			fmt.Println(n)
-			ch <- n + 1
-		}
-	}
-}
-
-```
-
-# 5. Print even odd numbers using built-in function
-
-```go
-// You can edit this code!
-// Click here and start typing.
-package main
-
-import (
-	"fmt"
-	"sync"
-)
-
-func main() {
-	var wg sync.WaitGroup
-	oddCh := make(chan int)
-	evenCh := make(chan int)
-	wg.Add(2)
-	go oddNums(oddCh, evenCh, &wg)
-	go evenNums(oddCh, evenCh, &wg)
-	oddCh <- 1
-	wg.Wait()
-}
-
-func oddNums(oddCh, evenCh chan int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	for n := range oddCh {
-		fmt.Println(n)
-		evenCh <- n + 1
-	}
-}
-
-func evenNums(oddCh, evenCh chan int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	for n := range evenCh {
-		fmt.Println(n)
-		if n == 10 {
-			close(oddCh)
-			close(evenCh)
-			return
-		}
-		oddCh <- n + 1
-	}
-}
-
-```
-
-# 6. Print prime numbers
-
-```go
-// You can edit this code!
-// Click here and start typing.
 package main
 
 import "fmt"
@@ -244,14 +112,11 @@ func isPrime(n int) bool {
 	}
 	return true
 }
-
 ```
 
-# 7. Print factorial with recursive method
+### Factorial (Recursive)
 
 ```go
-// You can edit this code!
-// Click here and start typing.
 package main
 
 import "fmt"
@@ -267,14 +132,11 @@ func fact(n int) int {
 	}
 	return n * fact(n-1)
 }
-
 ```
 
-# 8. Print fibonacci series with recursive method
+### Fibonacci Series (Recursive)
 
 ```go
-// You can edit this code!
-// Click here and start typing.
 package main
 
 import "fmt"
@@ -291,64 +153,108 @@ func fibonacciSeries(n int) int {
 	}
 	return fibonacciSeries(n-1) + fibonacciSeries(n-2)
 }
-
 ```
-# 8. Print prime numbers from a array using channel
+
+### Length of Last Word
+Finds the length of the last word in a string, handling trailing spaces.
 
 ```go
-// You can edit this code!
-// Click here and start typing.
+package main
+
+import "fmt"
+
+func main() {
+	str := "Hello World                                                                                                                                          "
+	fmt.Println("Length of String is :: ", len(str))
+	fmt.Println("Length of last Word :: ", lastWordLength(str))
+}
+
+func lastWordLength(str string) int {
+	var length int
+	for i := len(str) - 1; i >= 0; i-- {
+		if str[i] == ' ' && length > 0 {
+			return length
+		} else {
+			if (str[i] >= 'A' && str[i] >= 'Z') || (str[i] >= 'a' && str[i] >= 'z') {
+				length = length + 1
+			}
+		}
+	}
+	return length
+}
+```
+
+---
+
+## Data Structures (Strings, Arrays, Maps)
+
+### Count Vowels & Consonants (Built-in)
+Uses `unicode` and `strings` packages.
+
+```go
 package main
 
 import (
 	"fmt"
-	"sync"
+	"strings"
+	"unicode"
 )
 
 func main() {
-	var wg sync.WaitGroup
-	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
-	primeNums := make(chan int)
-	for _, val := range arr {
-		wg.Add(1)
-		go PrimeNumbers(val, primeNums, &wg)
-	}
-	go func() {
-		wg.Wait()
-		close(primeNums)
-	}()
-
-	for n := range primeNums {
-		fmt.Println(n)
-	}
-}
-
-func PrimeNumbers(val int, ch chan int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	if isPrime(val) {
-		ch <- val
-	}
-}
-
-func isPrime(n int) bool {
-	if n < 2 {
-		return false
-	}
-	for i := 2; i*i <= n; i++ {
-		if n%i == 0 {
-			return false
+	str := "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*aeiouelephant"
+	var vowelCount int
+	var consonantCount int
+	for _, char := range str {
+		if unicode.IsLetter(char) {
+			if strings.ContainsRune("aeiou", char) {
+				vowelCount = vowelCount + 1
+			} else {
+				consonantCount = consonantCount + 1
+			}
 		}
 	}
-	return true
+	fmt.Println("Vowels are :: ", vowelCount)
+	fmt.Println("Consonant are :: ", consonantCount)
 }
-
 ```
 
-# 9. Write a program to Reverse of an array
+### Count Vowels & Consonants (Custom)
+Manual implementation without `strings` package helper for vowels.
 
 ```go
-// You can edit this code!
-// Click here and start typing.
+package main
+
+import "fmt"
+
+func main() {
+	str := "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*"
+	var vowel int
+	var consonant int
+	for _, char := range str {
+		if isLetter(char) {
+			if isVowel(char) {
+				vowel = vowel + 1
+			} else {
+				consonant = consonant + 1
+			}
+		}
+	}
+	fmt.Println("Vowel count :: ", vowel)
+	fmt.Println("Consonant count :: ", consonant)
+}
+
+func isLetter(char rune) bool {
+	return (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')
+}
+
+func isVowel(char rune) bool {
+	return char == 'a' || char == 'e' || char == 'i' || char == 'o' || char == 'u' || char == 'A' || char == 'E' || char == 'I' || char == 'O' || char == 'U'
+}
+```
+
+### Reverse Array
+
+```go
 package main
 
 import "fmt"
@@ -365,14 +271,12 @@ func reverseArray(arr []int) []int {
 	}
 	return arr
 }
-
 ```
 
-# 9. Write a program to Remove duplicate value from an array/slice
+### Remove Duplicates from Slice
+Shows how to find unique values, count occurrences, and track indices of duplicates.
 
 ```go
-// You can edit this code!
-// Click here and start typing.
 package main
 
 import "fmt"
@@ -428,14 +332,16 @@ func duplicateElementsIndex(arr []int) map[int][]int {
 	}
 	return result
 }
-
 ```
 
-# 10. Write a program to sort an Employee Struct based on their age. If age is same then sort based on their name.
+---
+
+## Structs & Sorting
+
+### Sort Employees by Age & Name
+Sorts a struct slice by Age (primary) and Name (secondary).
 
 ```go
-// You can edit this code!
-// Click here and start typing.
 package main
 
 import (
@@ -467,45 +373,16 @@ func ManipulateEmpData(emps []Employees) []Employees {
 	}
 	return emps
 }
-
 ```
 
-# 11. Write a program to find the length of last word in string.
+---
+
+## Concurrency (Goroutines & Channels)
+
+### Odd/Even Numbers (Single Channel)
+Two goroutines communicating via a shared channel.
 
 ```go
-// You can edit this code!
-// Click here and start typing.
-package main
-
-import "fmt"
-
-func main() {
-	str := "Hello World                                                                                                                                          "
-	fmt.Println("Length of String is :: ", len(str))
-	fmt.Println("Length of last Word :: ", lastWordLength(str))
-}
-
-func lastWordLength(str string) int {
-	var length int
-	for i := len(str) - 1; i >= 0; i-- {
-		if str[i] == ' ' && length > 0 {
-			return length
-		} else {
-			if (str[i] >= 'A' && str[i] >= 'Z') || (str[i] >= 'a' && str[i] >= 'z') {
-				length = length + 1
-			}
-		}
-	}
-	return length
-}
-
-```
-
-# 12. Write a program to calculate the sum of odd and even numbers using goroutines and channels.
-
-```go
-// You can edit this code!
-// Click here and start typing.
 package main
 
 import (
@@ -515,52 +392,84 @@ import (
 
 func main() {
 	var wg sync.WaitGroup
-	nums := []int{1, 2, 3, 4, 5}
-	oddNums := make(chan int)
-	evenNums := make(chan int)
-	wg.Add(3)
-	go findNumbers(nums, oddNums, evenNums, &wg)
-	go sumOfOddNums(oddNums, &wg)
-	go sumOfEvenNums(evenNums, &wg)
+	ch := make(chan int)
+	wg.Add(2)
+	go oddNums(ch, &wg)
+	go evenNums(ch, &wg)
+	ch <- 1
 	wg.Wait()
 }
 
-func findNumbers(nums []int, odd, even chan int, wg *sync.WaitGroup) {
+func oddNums(ch chan int, wg *sync.WaitGroup) {
 	defer wg.Done()
-	for _, val := range nums {
-		if val%2 == 0 {
-			even <- val
+	for n := range ch {
+		fmt.Println(n)
+		ch <- n + 1
+	}
+}
+
+func evenNums(ch chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for n := range ch {
+		if n > 10 {
+			close(ch)
+			return
 		} else {
-			odd <- val
+			fmt.Println(n)
+			ch <- n + 1
 		}
 	}
-	close(even)
-	close(odd)
 }
-
-func sumOfOddNums(odd chan int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	var sum int
-	for n := range odd {
-		sum = sum + n
-	}
-	fmt.Println("Sum of Odd Numbers :: ", sum)
-}
-
-func sumOfEvenNums(even chan int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	var sum int
-	for n := range even {
-		sum = sum + n
-	}
-	fmt.Println("Sum of Even Numbers :: ", sum)
-}
-
 ```
 
+### Odd/Even Numbers (Multiple Channels)
+Separate channels for odd and even numbers.
+
 ```go
-// You can edit this code!
-// Click here and start typing.
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	var wg sync.WaitGroup
+	oddCh := make(chan int)
+	evenCh := make(chan int)
+	wg.Add(2)
+	go oddNums(oddCh, evenCh, &wg)
+	go evenNums(oddCh, evenCh, &wg)
+	oddCh <- 1
+	wg.Wait()
+}
+
+func oddNums(oddCh, evenCh chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for n := range oddCh {
+		fmt.Println(n)
+		evenCh <- n + 1
+	}
+}
+
+func evenNums(oddCh, evenCh chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for n := range evenCh {
+		fmt.Println(n)
+		if n == 10 {
+			close(oddCh)
+			close(evenCh)
+			return
+		}
+		oddCh <- n + 1
+	}
+}
+```
+
+### Sum of Odd/Even Numbers
+Calculates sums in background goroutines.
+
+```go
 package main
 
 import (
@@ -606,14 +515,61 @@ func findNums(num int, odd, even chan int, wg *sync.WaitGroup) {
 		odd <- num
 	}
 }
-
 ```
 
-# 13. Print the index of prime number using goroutines and channels.  
+### Prime Numbers from Array
+Workers process array elements and send primes to a channel.
 
 ```go
-// You can edit this code!
-// Click here and start typing.
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	var wg sync.WaitGroup
+	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
+	primeNums := make(chan int)
+	for _, val := range arr {
+		wg.Add(1)
+		go PrimeNumbers(val, primeNums, &wg)
+	}
+	go func() {
+		wg.Wait()
+		close(primeNums)
+	}()
+
+	for n := range primeNums {
+		fmt.Println(n)
+	}
+}
+
+func PrimeNumbers(val int, ch chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if isPrime(val) {
+		ch <- val
+	}
+}
+
+func isPrime(n int) bool {
+	if n < 2 {
+		return false
+	}
+	for i := 2; i*i <= n; i++ {
+		if n%i == 0 {
+			return false
+		}
+	}
+	return true
+}
+```
+
+### Index of Prime Numbers
+Returns the index of prime numbers found in an array.
+
+```go
 package main
 
 import (
@@ -659,28 +615,24 @@ func isPrime(n int) bool {
 	}
 	return true
 }
-
 ```
 
-# 14. What is difference between synchronous and asynchronous. How It can be implemented in golang with goroutines and channels. Explain it with an example.  
+### Synchronous vs Asynchronous Concepts
 
-<b>Synchronous programming</b> runs tasks one after another, with each task waiting for the previous one to finish—like following a recipe step-by-step. This makes the code predictable and simple to debug, but it can also lead to slowdowns if you have a task that takes a long time (like waiting for data from an external source).
+**Synchronous programming** runs tasks one after another, with each task waiting for the previous one to finish—like following a recipe step-by-step. This makes the code predictable and simple to debug, but it can also lead to slowdowns if you have a task that takes a long time (like waiting for data from an external source).
 
+**Asynchronous programming** allows multiple tasks to start and run at the same time, without blocking each other—a bit like cooking several dishes simultaneously. The program doesn’t wait for one to finish before starting the next, leading to better performance and responsiveness, especially when tasks are slow or involve waiting (I/O, network requests).
 
-<b>Asynchronous programming</b> allows multiple tasks to start and run at the same time, without blocking each other—a bit like cooking several dishes simultaneously. The program doesn’t wait for one to finish before starting the next, leading to better performance and responsiveness, especially when tasks are slow or involve waiting (I/O, network requests).
+**In Go: Goroutines & Channels**
+ - **Goroutines** let you run functions concurrently (asynchronously). Just put `go` in front of a function call.
+ - **Channels** let those goroutines communicate safely, sending and receiving values so you can coordinate when things are ready.
 
-<b>In Go: Goroutines & Channels </b>  
- - Goroutines let you run functions concurrently (asynchronously). Just put go in front of a function call.
- - Channels let those goroutines communicate safely, sending and receiving values so you can coordinate when things are ready.
-
-<b> Typical workflow: </b> 
- - Synchronous: task1(); task2(); task3(); — runs one-by-one.
- - Asynchronous: go task1(); go task2(); go task3(); — all start at once, possibly finishing in any order.
+**Typical workflow:**
+ - **Synchronous:** `task1(); task2(); task3();` — runs one-by-one.
+ - **Asynchronous:** `go task1(); go task2(); go task3();` — all start at once, possibly finishing in any order.
  - With channels, you can wait for results or synchronize tasks.
 
-### Example
-
-<b> Synchronous Example </b>
+#### Synchronous Example
 ```go
 package main
 
@@ -700,10 +652,9 @@ func main() {
 	task("Task 2")
 	fmt.Println("All tasks done synchronously")
 }
-
 ```
 
-<b> Asynchronous Example </b>
+#### Asynchronous Example
 ```go
 package main
 
@@ -731,5 +682,4 @@ func main() {
 
 	fmt.Println("All tasks done asynchronously")
 }
-
 ```
