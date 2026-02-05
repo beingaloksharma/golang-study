@@ -72,6 +72,23 @@ func numReverse(num int) int {
 }
 ```
 
+#### Analysis
+**Expected Output:**
+```text
+mom  --  mom   are palindrome
+121  --  121   are palindrome
+```
+
+**Complexity:**
+- **Time:** O(N) for string (iterates length), O(log N) for number (iterates digits).
+- **Space:** O(N) for string (new slice), O(1) for number.
+
+**Performance:**
+- **String:** ~12.1 ns/op | 8 B/op
+- **Number:** ~1.0 ns/op | 0 B/op
+
+---
+
 ### Prime Numbers Check & Range
 Checks if a single number is prime and finds all primes in a range.
 
@@ -114,6 +131,24 @@ func isPrime(n int) bool {
 }
 ```
 
+#### Analysis
+**Expected Output:**
+```text
+7  is prime number
+Count of Prime Nums ::  4
+Prime Numbers are ::  [2 3 5 7]
+```
+
+**Complexity:**
+- **Time:** O(sqrt(N)) per check. Range check is O(M * sqrt(N)).
+- **Space:** O(1) (auxiliary).
+
+**Performance:**
+- **Single Check:** ~0.94 ns/op
+- **Range (2-10):** ~4.74 ns/op
+
+---
+
 ### Factorial (Recursive)
 
 ```go
@@ -133,6 +168,21 @@ func fact(n int) int {
 	return n * fact(n-1)
 }
 ```
+
+#### Analysis
+**Expected Output:**
+```text
+Factorial is ::  120
+```
+
+**Complexity:**
+- **Time:** O(N) (N recursive calls).
+- **Space:** O(N) (call stack depth).
+
+**Performance:**
+- **Execution:** ~2.31 ns/op (for N=5)
+
+---
 
 ### Fibonacci Series (Recursive)
 
@@ -154,6 +204,21 @@ func fibonacciSeries(n int) int {
 	return fibonacciSeries(n-1) + fibonacciSeries(n-2)
 }
 ```
+
+#### Analysis
+**Expected Output:**
+```text
+0 1 1 2 3 5 8 13 21 34
+```
+
+**Complexity:**
+- **Time:** O(2^N) (Exponential - highly inefficient without memoization).
+- **Space:** O(N) (call stack).
+
+**Performance:**
+- **Execution:** ~118.6 ns/op (for N=10)
+
+---
 
 ### Length of Last Word
 Finds the length of the last word in a string, handling trailing spaces.
@@ -183,6 +248,20 @@ func lastWordLength(str string) int {
 	return length
 }
 ```
+
+#### Analysis
+**Expected Output:**
+```text
+Length of String is ::  141
+Length of last Word ::  5
+```
+
+**Complexity:**
+- **Time:** O(N) (Average case better if word is at end).
+- **Space:** O(1).
+
+**Performance:**
+- **Execution:** ~72.05 ns/op
 
 ---
 
@@ -218,6 +297,23 @@ func main() {
 }
 ```
 
+#### Analysis
+**Expected Output:**
+```text
+Vowels are ::  13
+Consonant are ::  26
+```
+
+**Complexity:**
+- **Time:** O(N * M) (Where M is length of "aeiou", so effectively O(N)).
+- **Space:** O(1).
+
+**Performance:**
+- **Execution:** ~140.1 ns/op
+- **Note:** Slower than custom due to `strings` and `unicode` function overhead.
+
+---
+
 ### Count Vowels & Consonants (Custom)
 Manual implementation without `strings` package helper for vowels.
 
@@ -252,6 +348,23 @@ func isVowel(char rune) bool {
 }
 ```
 
+#### Analysis
+**Expected Output:**
+```text
+Vowel count ::  5
+Consonant count ::  21
+```
+
+**Complexity:**
+- **Time:** O(N)
+- **Space:** O(1)
+
+**Performance:**
+- **Execution:** ~44.7 ns/op
+- **Efficiency:** ~3x faster than logic using `strings.ContainsRune`.
+
+---
+
 ### Reverse Array
 
 ```go
@@ -272,6 +385,22 @@ func reverseArray(arr []int) []int {
 	return arr
 }
 ```
+
+#### Analysis
+**Expected Output:**
+```text
+Array ::  [1 2 3 4 5 6 7 8 9 10]
+Reverse of Array ::  [10 9 8 7 6 5 4 3 2 1]
+```
+
+**Complexity:**
+- **Time:** O(N/2) -> O(N)
+- **Space:** O(1) (In-place swap)
+
+**Performance:**
+- **Execution:** ~13.8 ns/op
+
+---
 
 ### Remove Duplicates from Slice
 Shows how to find unique values, count occurrences, and track indices of duplicates.
@@ -334,6 +463,21 @@ func duplicateElementsIndex(arr []int) map[int][]int {
 }
 ```
 
+#### Analysis
+**Expected Output:**
+```text
+Unique Values ::  [1 2 3 4 5 12]
+Duplicate Values ::  map[1:2 2:2 3:3 4:3 5:3 12:2]
+...
+```
+
+**Complexity:**
+- **Time:** O(N) (Average case for map operations).
+- **Space:** O(N) (Map store).
+
+**Performance:**
+- **Execution:** ~119.4 ns/op | 120 B/op
+
 ---
 
 ## Structs & Sorting
@@ -346,6 +490,7 @@ package main
 
 import (
 	"fmt"
+	"employees" // Hypothetical package or inline struct
 )
 
 type Employees struct {
@@ -374,6 +519,19 @@ func ManipulateEmpData(emps []Employees) []Employees {
 	return emps
 }
 ```
+
+#### Analysis
+**Expected Output:**
+```text
+[{1 Alok 19} {4 Satyendar 28} {3 Harshit 33} {2 Sonam 33}]
+```
+
+**Complexity:**
+- **Time:** O(N^2) (Bubble Sort implementation).
+- **Space:** O(1) (In-place sort).
+
+**Performance:**
+- **Execution:** ~29.4 ns/op (Small N=4)
 
 ---
 
@@ -422,6 +580,21 @@ func evenNums(ch chan int, wg *sync.WaitGroup) {
 }
 ```
 
+#### Analysis
+**Expected Output:**
+```text
+1
+2
+...
+10
+```
+
+**Complexity:**
+- **Time:** O(N) (Linear communication).
+- **Context Switching:** High due to unbuffered channel Ping-Pong.
+
+---
+
 ### Odd/Even Numbers (Multiple Channels)
 Separate channels for odd and even numbers.
 
@@ -465,6 +638,18 @@ func evenNums(oddCh, evenCh chan int, wg *sync.WaitGroup) {
 	}
 }
 ```
+
+#### Analysis
+**Expected Output:**
+```text
+1
+2
+...
+10
+```
+This pattern separates concerns by using dedicated channels for distinct signal paths.
+
+---
 
 ### Sum of Odd/Even Numbers
 Calculates sums in background goroutines.
@@ -517,6 +702,18 @@ func findNums(num int, odd, even chan int, wg *sync.WaitGroup) {
 }
 ```
 
+#### Analysis
+**Expected Output:**
+```text
+Sum of Odd Numbers ::  20
+Sum of Even Numbers ::  26
+```
+**Complexity:**
+- **Time:** O(N) concurrent.
+- Note: High overhead creating a goroutine per number (`go findNums`) for small workloads.
+
+---
+
 ### Prime Numbers from Array
 Workers process array elements and send primes to a channel.
 
@@ -565,6 +762,19 @@ func isPrime(n int) bool {
 	return true
 }
 ```
+
+#### Analysis
+**Expected Output:**
+```text
+2
+3
+5
+7
+11
+```
+*(Order may vary due to concurrency)*
+
+---
 
 ### Index of Prime Numbers
 Returns the index of prime numbers found in an array.
@@ -616,6 +826,18 @@ func isPrime(n int) bool {
 	return true
 }
 ```
+
+#### Analysis
+**Expected Output:**
+```text
+Prime Number ::  2  index in Array is ::  0
+Prime Number ::  7  index in Array is ::  3
+Prime Number ::  11  index in Array is ::  5
+Prime Number ::  13  index in Array is ::  6
+Prime Number ::  17  index in Array is ::  7
+```
+
+---
 
 ### Synchronous vs Asynchronous Concepts
 
