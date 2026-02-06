@@ -963,3 +963,55 @@ true
 - **Execution Time:** ~92.78 ns/op
 - **Memory Usage:** 0 B/op (due to stack allocation on stack/small size not triggering heap allocs for small inputs in test)
 - **Allocations:** 0 allocs/op
+
+### Squares of a Sorted Array
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func SortedSquare(arr []int) []int {
+	n := len(arr)
+	result := make([]int, n)
+	left, right := 0, n-1
+	for i := n - 1; i >= 0; i-- {
+		if abs(arr[left]) > abs(arr[right]) {
+			result[i] = arr[left] * arr[left]
+			left++
+		} else {
+			result[i] = arr[right] * arr[right]
+			right--
+		}
+	}
+	return result
+}
+
+func abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
+
+func main() {
+	fmt.Println("Sorted Array :: ", SortedSquare([]int{-4, -1, 0, 3, 10}))
+}
+```
+
+#### Analysis
+**Expected Output:**
+```text
+Sorted Array ::  [0 1 9 16 100]
+```
+
+**Time Complexity:** O(n) - Single pass using two pointers.
+**Space Complexity:** O(n) - To store the result array.
+
+**Benchmark Results:**
+- **Execution Time:** ~12.56 ns/op
+- **Memory Usage:** 48 B/op
+- **Allocations:** 1 allocs/op
+
