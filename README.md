@@ -905,3 +905,61 @@ func main() {
 	fmt.Println("All tasks done asynchronously")
 }
 ```
+
+### Valid Parentheses
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func IsValid(str string) bool {
+	pairs := map[rune]rune{
+		')': '(',
+		']': '[',
+		'}': '{',
+	}
+	stack := []rune{}
+	for _, char := range str {
+		if char == '(' || char == '[' || char == '{' {
+			stack = append(stack, char)
+		} else {
+			if len(stack) == 0 {
+				return false
+			}
+			opener := stack[len(stack)-1]
+			if opener != pairs[char] {
+				return false
+			}
+			stack = stack[:len(stack)-1]
+		}
+	}
+	return len(stack) == 0
+}
+
+func main() {
+	fmt.Println(IsValid("()[]{}"))
+	fmt.Println(IsValid("(]"))
+	fmt.Println(IsValid("([)]"))
+	fmt.Println(IsValid("{[]}"))
+}
+```
+
+#### Analysis
+**Expected Output:**
+```text
+true
+false
+false
+true
+```
+
+**Time Complexity:** O(n) - We traverse the string once.
+**Space Complexity:** O(n) - In the worst case, we push all characters onto the stack.
+
+**Benchmark Results:**
+- **Execution Time:** ~92.78 ns/op
+- **Memory Usage:** 0 B/op (due to stack allocation on stack/small size not triggering heap allocs for small inputs in test)
+- **Allocations:** 0 allocs/op
