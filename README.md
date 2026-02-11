@@ -10,6 +10,7 @@ A collection of Go exercises and examples covering basics, data structures, algo
     - [Factorial (Recursive)](#factorial-recursive)
     - [Fibonacci Series (Recursive)](#fibonacci-series-recursive)
     - [Length of Last Word](#length-of-last-word)
+    - [Valid Parentheses](#valid-parentheses)
 - [Data Structures (Strings, Arrays, Maps)](#data-structures-strings-arrays-maps)
     - [Count Vowels & Consonants (Built-in)](#count-vowels--consonants-built-in)
     - [Count Vowels & Consonants (Custom)](#count-vowels--consonants-custom)
@@ -262,6 +263,80 @@ Length of last Word ::  5
 
 **Performance:**
 - **Execution:** ~72.05 ns/op
+
+---
+
+### Valid Parentheses
+Checks if the input string has valid matching parentheses.
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	testCases := []string{
+		"()",     // true
+		"()[]{}", // true
+		"(]",     // false
+		"([)]",   // false
+		"{[]}",   // true
+		"(",      // false
+		"",       // true (an empty string is technically balanced)
+	}
+
+	for _, tc := range testCases {
+		fmt.Printf("Input: %-10s Valid: %v\n", tc, IsValid(tc))
+	}
+}
+
+func IsValid(str string) bool {
+	stack := make([]rune, 0, len(str))
+	for _, char := range str {
+		if char == '(' || char == '{' || char == '[' {
+			stack = append(stack, char)
+		} else {
+			switch char {
+			case '(', '{', '[':
+				stack = append(stack, char)
+			case ')':
+				if len(stack) == 0 || stack[len(stack)-1] != '(' {
+					return false
+				}
+			case '}':
+				if len(stack) == 0 || stack[len(stack)-1] != '{' {
+					return false
+				}
+			case ']':
+				if len(stack) == 0 || stack[len(stack)-1] != '[' {
+					return false
+				}
+			}
+			stack = stack[:len(stack)-1]
+		}
+	}
+	return len(stack) == 0
+}
+```
+
+#### Analysis
+**Expected Output:**
+```text
+Input: ()         Valid: true
+Input: ()[]{}     Valid: true
+Input: (]         Valid: false
+Input: ([)]       Valid: false
+Input: {[]}       Valid: true
+Input: (          Valid: false
+Input:            Valid: true
+```
+
+**Complexity:**
+- **Time:** O(N) where N is the length of the string.
+- **Space:** O(N) for the stack in the worst case.
+
+**Performance:**
+- **Execution:** ~7.42 ns/op | 0 B/op
 
 ---
 
