@@ -63,6 +63,8 @@ func main() {
 }
 
 func strReverse(str string) string {
+	// Declare a byte slice to construct the reversed string efficiently.
+	// Using a slice allows us to append characters dynamically.
 	var chars []byte
 	for i := 0; i < len(str); i++ {
 		chars = append(chars, str[len(str)-i-1])
@@ -71,6 +73,8 @@ func strReverse(str string) string {
 }
 
 func numReverse(num int) int {
+	// 'rev' will hold the reversed number.
+	// We use an integer here because we are performing mathematical operations.
 	var rev int
 	for num > 0 {
 		rev = rev*10 + num%10
@@ -116,7 +120,10 @@ func main() {
 	} else {
 		fmt.Println(num, " is not prime number")
 	}
+	// 'primeNumsCount' tracks the total number of prime numbers found.
 	var primeNumsCount int
+	// 'primeNums' is a slice initialized to store the actual prime numbers found in the range.
+	// Slices are dynamic arrays in Go, perfect for when the number of elements isn't known upfront.
 	var primeNums []int
 	start := 2
 	end := 10
@@ -253,6 +260,8 @@ func main() {
 }
 
 func lastWordLength(str string) int {
+	// 'length' stores the count of characters in the last word.
+	// It is initialized to 0 by default.
 	var length int
 	for i := len(str) - 1; i >= 0; i-- {
 		if str[i] == ' ' && length > 0 {
@@ -313,11 +322,14 @@ func main() {
 }
 
 func IsValid(str string) bool {
+	// 'pairs' map holds the closing parenthesis as key and opening as value for quick lookup.
 	pairs := map[rune]rune{
 		')': '(',
 		'}': '{',
 		']': '[',
 	}
+	// 'stack' is used to keep track of opening parentheses.
+	// We use a slice as a stack (Last-In-First-Out).
 	stack := make([]rune, 0, len(str))
 	for _, char := range str {
 		if _, isClosing := pairs[char]; !isClosing {
@@ -337,6 +349,7 @@ func IsValid(str string) bool {
 ### Solution 2: Switch Case
 ```go
 func IsValidSwitch(str string) bool {
+	// Stack to hold open parentheses.
 	stack := make([]rune, 0, len(str))
 	for _, char := range str {
 		if char == '(' || char == '{' || char == '[' {
@@ -373,6 +386,7 @@ func IsValidMap(str string) bool {
 		'}': '{',
 		']': '[',
 	}
+	// 'stack' keeps track of opening brackets encountered.
 	stack := make([]rune, 0, len(str))
 	for _, char := range str {
 		if char == '(' || char == '{' || char == '[' {
@@ -420,7 +434,9 @@ import (
 
 func SortedSquare(arr []int) []int {
 	n := len(arr)
+	// 'result' slice of size 'n' to store the squared values.
 	result := make([]int, n)
+	// 'left' and 'right' pointers to iterate from both ends of the sorted array.
 	left, right := 0, n-1
 	for i := n - 1; i >= 0; i-- {
 		if abs(arr[left]) > abs(arr[right]) {
@@ -477,6 +493,7 @@ import (
 
 func main() {
 	str := "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*aeiouelephant"
+	// Variables to count vowels and consonants respectively.
 	var vowelCount int
 	var consonantCount int
 	for _, char := range str {
@@ -522,6 +539,7 @@ import "fmt"
 
 func main() {
 	str := "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*"
+	// Manual counters for vowels and consonants.
 	var vowel int
 	var consonant int
 	for _, char := range str {
@@ -580,6 +598,7 @@ func main() {
 }
 
 func reverseArray(arr []int) []int {
+	// Reverse the array in-place by swapping elements from both ends.
 	for i := 0; i < len(arr)/2; i++ {
 		arr[i], arr[len(arr)-i-1] = arr[len(arr)-i-1], arr[i]
 	}
@@ -624,7 +643,9 @@ func main() {
 }
 
 func duplicateElements(arr []int) []int {
+	// 'result' slice to store unique elements.
 	var result []int
+	// 'duplicate' map to track seen elements. Key is the element, value is boolean (true if seen).
 	duplicate := make(map[int]bool)
 	for i := 0; i < len(arr); i++ {
 		if !duplicate[arr[i]] {
@@ -636,6 +657,7 @@ func duplicateElements(arr []int) []int {
 }
 
 func duplicateElementsCount(arr []int) map[int]int {
+	// 'result' map where Key = element, Value = count of occurrences.
 	result := map[int]int{}
 	for i := 0; i < len(arr); i++ {
 		val, ok := result[arr[i]]
@@ -649,6 +671,7 @@ func duplicateElementsCount(arr []int) map[int]int {
 }
 
 func duplicateElementsIndex(arr []int) map[int][]int {
+	// 'result' map where Key = element, Value = slice of indices where it appears.
 	result := map[int][]int{}
 	for i := 0; i < len(arr); i++ {
 		val, ok := result[arr[i]]
@@ -697,6 +720,7 @@ func main() {
 }
 
 func ManipulateEmpData(emps []Employees) []Employees {
+	// Nested loops to perform a Bubble Sort based on Age and Name.
 	for i := 0; i < len(emps); i++ {
 		for j := i + 1; j < len(emps); j++ {
 			if emps[i].Age > emps[j].Age {
@@ -741,7 +765,9 @@ import (
 )
 
 func main() {
+	// 'wg' WaitGroup is used to wait for all goroutines to finish.
 	var wg sync.WaitGroup
+	// 'ch' is an unbuffered channel for integer communication between goroutines.
 	ch := make(chan int)
 	wg.Add(2)
 	go oddNums(ch, &wg)
@@ -799,6 +825,7 @@ import (
 
 func main() {
 	var wg sync.WaitGroup
+	// Separate channels for odd and even numbers to handle them independently.
 	oddCh := make(chan int)
 	evenCh := make(chan int)
 	wg.Add(2)
@@ -855,6 +882,7 @@ import (
 
 func main() {
 	var wg sync.WaitGroup
+	// Variables to store the final sums.
 	var oddSum, evenSum int
 	odd := make(chan int)
 	even := make(chan int)
@@ -923,6 +951,7 @@ import (
 func main() {
 	var wg sync.WaitGroup
 	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
+	// Channel to collect prime numbers from concurrent workers.
 	primeNums := make(chan int)
 	for _, val := range arr {
 		wg.Add(1)
@@ -982,6 +1011,7 @@ import (
 
 func main() {
 	var wg sync.WaitGroup
+	// Channel to communicate indices of prime numbers back to main.
 	primeIndex := make(chan int)
 	arr := []int{2, 4, 6, 7, 8, 11, 13, 17}
 	wg.Add(2)
