@@ -22,6 +22,9 @@ A comprehensive collection of Go exercises, algorithms, and data structures impl
     - [Reverse Array](#reverse-array)
     - [Remove Duplicates from Slice](#remove-duplicates-from-slice)
     - [Sort Employees by Age & Name](#sort-employees-by-age--name)
+- [Interfaces](#interfaces)
+    - [Geometry Shape Pattern](#geometry-shape-pattern)
+    - [Payment Method (Factory Pattern)](#payment-method-factory-pattern)
 - [Concurrency](#concurrency)
     - [Odd/Even Numbers (Single Channel)](#oddeven-numbers-single-channel)
     - [Odd/Even Numbers (Multiple Channels)](#oddeven-numbers-multiple-channels)
@@ -299,11 +302,10 @@ func lastWordLength(str string) int {
 ### Valid Parentheses
 Checks if a string has valid matching parentheses using a stack.
 
+#### Solution 1: Map (Optimized)
 <details>
 <summary><strong>View Solution</strong></summary>
 
-
-### Solution 1: Map (Optimized)
 ```go
 package main
 
@@ -349,8 +351,12 @@ func IsValid(str string) bool {
 	return len(stack) == 0
 }
 ```
+</details>
 
-### Solution 2: Switch Case
+#### Solution 2: Switch Case
+<details>
+<summary><strong>View Solution</strong></summary>
+
 ```go
 func IsValidSwitch(str string) bool {
 	// Stack to hold open parentheses.
@@ -381,8 +387,12 @@ func IsValidSwitch(str string) bool {
 	return len(stack) == 0
 }
 ```
+</details>
 
-### Solution 3: Direct Map Check
+#### Solution 3: Direct Map Check
+<details>
+<summary><strong>View Solution</strong></summary>
+
 ```go
 func IsValidMap(str string) bool {
 	pairs := map[rune]rune{
@@ -747,6 +757,133 @@ func ManipulateEmpData(emps []Employees) []Employees {
   - **Time:** O(N^2) (Bubble Sort)
   - **Space:** O(1)
 - **Performance:** ~29.4 ns/op (Small N=4)
+
+[Back to Top](#table-of-contents)
+
+---
+
+## Interfaces
+
+### Geometry Shape Pattern
+Demonstrates polymorphism using interfaces.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import "fmt"
+
+// Geometry interface defines the contract
+type Geometry interface {
+	Area()
+	Perimeter()
+}
+
+type Circle struct {
+	Radius int
+}
+
+type Rectangle struct {
+	Length, Width int
+}
+
+// Circle implementation
+func (c Circle) Area() {
+	fmt.Printf("Area of Circle: %d\n", 3*c.Radius*c.Radius)
+}
+
+func (c Circle) Perimeter() {
+	fmt.Printf("Perimeter of Circle: %d\n", 2*3*c.Radius)
+}
+
+// Rectangle implementation
+func (r Rectangle) Area() {
+	fmt.Printf("Area of Rectangle: %d\n", r.Length*r.Width)
+}
+
+func (r Rectangle) Perimeter() {
+	fmt.Printf("Perimeter of Rectangle: %d\n", 2*(r.Length+r.Width))
+}
+
+func main() {
+	// We can store different types in a slice of the interface
+	shapes := []Geometry{
+		Circle{Radius: 5},
+		Rectangle{Length: 10, Width: 5},
+	}
+
+	for _, shape := range shapes {
+		shape.Area()
+		shape.Perimeter()
+	}
+}
+```
+</details>
+
+#### Analysis
+- **Expected Output:**
+  ```text
+  Area of Circle: 75
+  Perimeter of Circle: 30
+  Area of Rectangle: 50
+  Perimeter of Rectangle: 30
+  ```
+- **Complexity:**
+  - **Time:** O(N) where N is number of shapes.
+  - **Space:** O(1) auxiliary.
+
+[Back to Top](#table-of-contents)
+
+---
+
+### Payment Method (Factory Pattern)
+Demonstrates the Factory Pattern using interfaces to decouple object creation logic.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import "fmt"
+
+type PaymentMethod interface {
+	Pay(amount float32)
+}
+
+type CreditCard struct{}
+
+func (c CreditCard) Pay(amount float32) {
+	fmt.Printf("Paid %v via Credit Card\n", amount)
+}
+
+type PayPal struct{}
+
+func (p PayPal) Pay(amount float32) {
+	fmt.Printf("Paid %v via Paypal \n", amount)
+}
+
+func GetPaymentMethod(method string) PaymentMethod {
+	if method == "paypal" {
+		return PayPal{}
+	}
+	return CreditCard{}
+}
+
+func main() {
+	payment := GetPaymentMethod("others")
+	payment.Pay(100.0)
+}
+```
+</details>
+
+#### Analysis
+- **Expected Output:** `Paid 100 via Credit Card` (Default case)
+- **Complexity:**
+  - **Time:** O(1)
+  - **Space:** O(1)
 
 [Back to Top](#table-of-contents)
 
@@ -1388,3 +1525,6 @@ func merge(left, right []int) []int {
 - **Benefits:** Reduces sorting time for massive arrays. Note the threshold check to prevent excessive goroutine creation overhead for small sub-arrays.
 
 [Back to Top](#table-of-contents)
+
+
+
