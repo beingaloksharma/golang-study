@@ -319,6 +319,95 @@ func IsValid(str string) bool {
 }
 ```
 
+```go
+package main
+
+import "fmt"
+
+func main() {
+	testCases := []string{
+		"()",     // true
+		"()[]{}", // true
+		"(]",     // false
+		"([)]",   // false
+		"{[]}",   // true
+		"(",      // false
+		"",       // true (an empty string is technically balanced)
+	}
+
+	for _, tc := range testCases {
+		fmt.Printf("Input: %-10s Valid: %v\n", tc, IsValid(tc))
+	}
+}
+
+func IsValid(str string) bool {
+	pairs := map[rune]rune{
+		')': '(',
+		'}': '{',
+		']': '[',
+	}
+	stack := make([]rune, 0, len(str))
+	for _, char := range str {
+		if char == '(' || char == '{' || char == '[' {
+			stack = append(stack, char)
+		} else {
+			if len(stack) == 0 {
+				return false
+			}
+			opener := stack[len(stack)-1]
+			if opener != pairs[char] {
+				return false
+			}
+			stack = stack[:len(stack)-1]
+		}
+	}
+	return len(stack) == 0
+}
+```
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	testCases := []string{
+		"()",     // true
+		"()[]{}", // true
+		"(]",     // false
+		"([)]",   // false
+		"{[]}",   // true
+		"(",      // false
+		"",       // true (an empty string is technically balanced)
+	}
+
+	for _, tc := range testCases {
+		fmt.Printf("Input: %-10s Valid: %v\n", tc, IsValid(tc))
+	}
+}
+
+func IsValid(str string) bool {
+	pairs := map[rune]rune{
+		')': '(',
+		'}': '{',
+		']': '[',
+	}
+	stack := make([]rune, 0, len(str))
+	for _, char := range str {
+		if _, isClosing := pairs[char]; !isClosing {
+			stack = append(stack, char)
+		} else {
+			if len(stack) == 0 || stack[len(stack)-1] != pairs[char] {
+				return false
+			}
+			stack = stack[:len(stack)-1]
+		}
+
+	}
+	return len(stack) == 0
+}
+```
+
 #### Analysis
 **Expected Output:**
 ```text
