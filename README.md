@@ -29,6 +29,10 @@ A comprehensive collection of Go exercises, algorithms, and data structures impl
     - [Prime Numbers from Array](#prime-numbers-from-array)
     - [Index of Prime Numbers](#index-of-prime-numbers)
     - [Synchronous vs Asynchronous Concepts](#synchronous-vs-asynchronous-concepts)
+- [Advanced Concurrency Patterns](#advanced-concurrency-patterns)
+    - [Concurrent Prime Checker (Worker Pool)](#concurrent-prime-checker-worker-pool)
+    - [Concurrent Vowel Counter (Map-Reduce)](#concurrent-vowel-counter-map-reduce)
+    - [Concurrent Merge Sort](#concurrent-merge-sort)
 
 ---
 
@@ -1127,5 +1131,260 @@ func main() {
 }
 ```
 </details>
+
+[Back to Top](#table-of-contents)
+
+---
+
+## Advanced Concurrency Patterns
+
+### Concurrent Prime Checker (Worker Pool)
+Efficiently finds prime numbers in a range using a pool of workers.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+// Worker function to process numbers from the jobs channel.
+func worker(jobs <-chan int, results chan<- int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for n := range jobs {
+		if isPrime(n) {
+			results <- n
+		}
+	}
+}
+
+func main() {
+	start := 2
+	end := 100
+	
+	// Create channels for jobs and results.
+	jobs := make(chan int, end-start+1)
+	results := make(chan int, end-start+1)
+	
+	// Define number of workers (simulating a thread pool).
+	numWorkers := 4
+	var wg sync.WaitGroup
+	
+	// Start workers.
+	for w := 0; w < numWorkers; w++ {
+		wg.Add(1)
+		go worker(jobs, results, &wg)
+	}
+	
+	// Send jobs.
+	for i := start; i <= end; i++ {
+		jobs <- i
+	}
+	close(jobs)
+	
+	// Close results channel when all workers are done.
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+	
+	// Collect results.
+	var primes []int
+	for p := range results {
+		primes = append(primes, p)
+	}
+	
+	fmt.Println("Primes found:", len(primes))
+	fmt.Println(primes)
+}
+
+func isPrime(n int) bool {
+	if n < 2 {
+		return false
+	}
+	for i := 2; i*i <= n; i++ {
+		if n%i == 0 {
+			return false
+		}
+	}
+	return true
+}
+```
+</details>
+
+#### Analysis
+- **Pattern:** Worker Pool.
+- **Benefits:** Controls resource usage by limiting the number of active goroutines, preventing system overload when processing large ranges.
+
+[Back to Top](#table-of-contents)
+
+---
+
+### Concurrent Vowel Counter (Map-Reduce)
+Counts vowels in a long string by splitting it into chunks and processing them in parallel.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+	"sync"
+)
+
+func countVowelsChunk(chunk string, result chan<- int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	count := 0
+	for _, char := range chunk {
+		if strings.ContainsRune("aeiouAEIOU", char) {
+			count++
+		}
+	}
+	result <- count
+}
+
+func main() {
+	text := "This is a very long string that we want to process concurrently to demonstrate the map reduce pattern in Golang."
+	// Simulate "Very Long String" by repeating.
+	for i := 0; i < 1000; i++ {
+		text += " count me "
+	}
+
+	numChunks := 4
+	chunkSize := len(text) / numChunks
+	
+	resultCh := make(chan int, numChunks)
+	var wg sync.WaitGroup
+
+	// Map step: distribute chunks to workers.
+	for i := 0; i < numChunks; i++ {
+		start := i * chunkSize
+		end := start + chunkSize
+		if i == numChunks-1 {
+			end = len(text)
+		}
+		
+		wg.Add(1)
+		go countVowelsChunk(text[start:end], resultCh, &wg)
+	}
+
+	// Wait for workers in a separate goroutine to close channel.
+	go func() {
+		wg.Wait()
+		close(resultCh)
+	}()
+
+	// Reduce step: combine results.
+	totalVowels := 0
+	for count := range resultCh {
+		totalVowels += count
+	}
+
+	fmt.Println("Total Vowels:", totalVowels)
+}
+```
+</details>
+
+#### Analysis
+- **Pattern:** Map-Reduce (Data Parallelism).
+- **Benefits:** Significant speedup for CPU-bound tasks on large datasets by utilizing multiple cores.
+
+[Back to Top](#table-of-contents)
+
+---
+
+### Concurrent Merge Sort
+Recursive parallel merge sort implementation.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	arr := []int{9, 4, 3, 2, 8, 5, 1, 6, 7, 0}
+	fmt.Println("Original:", arr)
+	
+	sorted := ParallelMergeSort(arr)
+	fmt.Println("Sorted:  ", sorted)
+}
+
+func ParallelMergeSort(arr []int) []int {
+	if len(arr) <= 1 {
+		return arr
+	}
+	
+	// Threshold to switch to sequential sort to avoid overhead.
+	if len(arr) < 5 {
+		return sequentialMergeSort(arr)
+	}
+
+	mid := len(arr) / 2
+	var left, right []int
+	var wg sync.WaitGroup
+	
+	wg.Add(2)
+	
+	go func() {
+		defer wg.Done()
+		left = ParallelMergeSort(arr[:mid])
+	}()
+	
+	go func() {
+		defer wg.Done()
+		right = ParallelMergeSort(arr[mid:])
+	}()
+	
+	wg.Wait()
+	return merge(left, right)
+}
+
+func sequentialMergeSort(arr []int) []int {
+	if len(arr) <= 1 {
+		return arr
+	}
+	mid := len(arr) / 2
+	left := sequentialMergeSort(arr[:mid])
+	right := sequentialMergeSort(arr[mid:])
+	return merge(left, right)
+}
+
+func merge(left, right []int) []int {
+	result := make([]int, 0, len(left)+len(right))
+	i, j := 0, 0
+	
+	for i < len(left) && j < len(right) {
+		if left[i] < right[j] {
+			result = append(result, left[i])
+			i++
+		} else {
+			result = append(result, right[j])
+			j++
+		}
+	}
+	
+	result = append(result, left[i:]...)
+	result = append(result, right[j:]...)
+	return result
+}
+```
+</details>
+
+#### Analysis
+- **Pattern:** Divide and Conquer (Parallel Recursion).
+- **Benefits:** Reduces sorting time for massive arrays. Note the threshold check to prevent excessive goroutine creation overhead for small sub-arrays.
 
 [Back to Top](#table-of-contents)
