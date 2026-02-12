@@ -1,8 +1,12 @@
-# Golang Study Guide
+# Golang Study Guide 🚀
 
-A collection of Go exercises and examples covering basics, data structures, algorithms, and concurrency.
+![Go Version](https://img.shields.io/badge/Go-1.21%2B-blue?style=flat&logo=go)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat)
+![Status](https://img.shields.io/badge/Status-Active-success?style=flat)
 
-## Table of Contents
+A comprehensive collection of Go exercises, algorithms, and data structures implemented with performance analysis. This repository serves as a study guide for mastering Golang concepts, from basics to concurrency.
+
+## 📚 Table of Contents
 
 - [Basics & Algorithms](#basics--algorithms)
     - [Reverse String & Number](#reverse-string--number)
@@ -11,14 +15,14 @@ A collection of Go exercises and examples covering basics, data structures, algo
     - [Fibonacci Series (Recursive)](#fibonacci-series-recursive)
     - [Length of Last Word](#length-of-last-word)
     - [Valid Parentheses](#valid-parentheses)
-- [Data Structures (Strings, Arrays, Maps)](#data-structures-strings-arrays-maps)
+    - [Squares of a Sorted Array](#squares-of-a-sorted-array)
+- [Data Structures](#data-structures)
     - [Count Vowels & Consonants (Built-in)](#count-vowels--consonants-built-in)
     - [Count Vowels & Consonants (Custom)](#count-vowels--consonants-custom)
     - [Reverse Array](#reverse-array)
     - [Remove Duplicates from Slice](#remove-duplicates-from-slice)
-- [Structs & Sorting](#structs--sorting)
     - [Sort Employees by Age & Name](#sort-employees-by-age--name)
-- [Concurrency (Goroutines & Channels)](#concurrency-goroutines--channels)
+- [Concurrency](#concurrency)
     - [Odd/Even Numbers (Single Channel)](#oddeven-numbers-single-channel)
     - [Odd/Even Numbers (Multiple Channels)](#oddeven-numbers-multiple-channels)
     - [Sum of Odd/Even Numbers](#sum-of-oddeven-numbers)
@@ -31,7 +35,10 @@ A collection of Go exercises and examples covering basics, data structures, algo
 ## Basics & Algorithms
 
 ### Reverse String & Number
-Checks if a string or number is a palindrome.
+Checks if a string or number is a palindrome by reversing it.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -72,26 +79,30 @@ func numReverse(num int) int {
 	return rev
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-mom  --  mom   are palindrome
-121  --  121   are palindrome
-```
+- **Expected Output:**
+  ```text
+  mom  --  mom   are palindrome
+  121  --  121   are palindrome
+  ```
+- **Complexity:**
+  - **Time:** O(N) for string, O(log N) for number.
+  - **Space:** O(N) for string, O(1) for number.
+- **Performance:**
+  - **String:** ~12.1 ns/op | 8 B/op
+  - **Number:** ~1.0 ns/op | 0 B/op
 
-**Complexity:**
-- **Time:** O(N) for string (iterates length), O(log N) for number (iterates digits).
-- **Space:** O(N) for string (new slice), O(1) for number.
-
-**Performance:**
-- **String:** ~12.1 ns/op | 8 B/op
-- **Number:** ~1.0 ns/op | 0 B/op
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Prime Numbers Check & Range
-Checks if a single number is prime and finds all primes in a range.
+Checks if a number is prime and finds all primes within a specific range.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -131,26 +142,31 @@ func isPrime(n int) bool {
 	return true
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-7  is prime number
-Count of Prime Nums ::  4
-Prime Numbers are ::  [2 3 5 7]
-```
+- **Expected Output:**
+  ```text
+  7  is prime number
+  Count of Prime Nums ::  4
+  Prime Numbers are ::  [2 3 5 7]
+  ```
+- **Complexity:**
+  - **Time:** O(M * sqrt(N)) for range check.
+  - **Space:** O(1) auxiliary.
+- **Performance:**
+  - **Single Check:** ~0.94 ns/op
+  - **Range (2-10):** ~4.74 ns/op
 
-**Complexity:**
-- **Time:** O(sqrt(N)) per check. Range check is O(M * sqrt(N)).
-- **Space:** O(1) (auxiliary).
-
-**Performance:**
-- **Single Check:** ~0.94 ns/op
-- **Range (2-10):** ~4.74 ns/op
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Factorial (Recursive)
+Calculates the factorial of a number using recursion.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -169,23 +185,24 @@ func fact(n int) int {
 	return n * fact(n-1)
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-Factorial is ::  120
-```
+- **Expected Output:** `Factorial is ::  120`
+- **Complexity:**
+  - **Time:** O(N)
+  - **Space:** O(N) (Recursion stack)
+- **Performance:** ~2.31 ns/op (N=5)
 
-**Complexity:**
-- **Time:** O(N) (N recursive calls).
-- **Space:** O(N) (call stack depth).
-
-**Performance:**
-- **Execution:** ~2.31 ns/op (for N=5)
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Fibonacci Series (Recursive)
+Generates Fibonacci numbers recursively (demonstrating exponential complexity without memoization).
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -205,24 +222,24 @@ func fibonacciSeries(n int) int {
 	return fibonacciSeries(n-1) + fibonacciSeries(n-2)
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-0 1 1 2 3 5 8 13 21 34
-```
+- **Expected Output:** `0 1 1 2 3 5 8 13 21 34`
+- **Complexity:**
+  - **Time:** O(2^N) (Exponential)
+  - **Space:** O(N)
+- **Performance:** ~118.6 ns/op (N=10)
 
-**Complexity:**
-- **Time:** O(2^N) (Exponential - highly inefficient without memoization).
-- **Space:** O(N) (call stack).
-
-**Performance:**
-- **Execution:** ~118.6 ns/op (for N=10)
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Length of Last Word
 Finds the length of the last word in a string, handling trailing spaces.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -249,26 +266,31 @@ func lastWordLength(str string) int {
 	return length
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-Length of String is ::  141
-Length of last Word ::  5
-```
+- **Expected Output:**
+  ```text
+  Length of String is ::  141
+  Length of last Word ::  5
+  ```
+- **Complexity:**
+  - **Time:** O(N)
+  - **Space:** O(1)
+- **Performance:** ~72.05 ns/op
 
-**Complexity:**
-- **Time:** O(N) (Average case better if word is at end).
-- **Space:** O(1).
-
-**Performance:**
-- **Execution:** ~72.05 ns/op
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Valid Parentheses
-Checks if the input string has valid matching parentheses.
+Checks if a string has valid matching parentheses using a stack.
 
+<details>
+<summary><strong>View Solution</strong></summary>
+
+
+### Solution 1: Map (Optimized)
 ```go
 package main
 
@@ -282,103 +304,7 @@ func main() {
 		"([)]",   // false
 		"{[]}",   // true
 		"(",      // false
-		"",       // true (an empty string is technically balanced)
-	}
-
-	for _, tc := range testCases {
-		fmt.Printf("Input: %-10s Valid: %v\n", tc, IsValid(tc))
-	}
-}
-
-func IsValid(str string) bool {
-	stack := make([]rune, 0, len(str))
-	for _, char := range str {
-		if char == '(' || char == '{' || char == '[' {
-			stack = append(stack, char)
-		} else {
-			switch char {
-			case '(', '{', '[':
-				stack = append(stack, char)
-			case ')':
-				if len(stack) == 0 || stack[len(stack)-1] != '(' {
-					return false
-				}
-			case '}':
-				if len(stack) == 0 || stack[len(stack)-1] != '{' {
-					return false
-				}
-			case ']':
-				if len(stack) == 0 || stack[len(stack)-1] != '[' {
-					return false
-				}
-			}
-			stack = stack[:len(stack)-1]
-		}
-	}
-	return len(stack) == 0
-}
-```
-
-```go
-package main
-
-import "fmt"
-
-func main() {
-	testCases := []string{
-		"()",     // true
-		"()[]{}", // true
-		"(]",     // false
-		"([)]",   // false
-		"{[]}",   // true
-		"(",      // false
-		"",       // true (an empty string is technically balanced)
-	}
-
-	for _, tc := range testCases {
-		fmt.Printf("Input: %-10s Valid: %v\n", tc, IsValid(tc))
-	}
-}
-
-func IsValid(str string) bool {
-	pairs := map[rune]rune{
-		')': '(',
-		'}': '{',
-		']': '[',
-	}
-	stack := make([]rune, 0, len(str))
-	for _, char := range str {
-		if char == '(' || char == '{' || char == '[' {
-			stack = append(stack, char)
-		} else {
-			if len(stack) == 0 {
-				return false
-			}
-			opener := stack[len(stack)-1]
-			if opener != pairs[char] {
-				return false
-			}
-			stack = stack[:len(stack)-1]
-		}
-	}
-	return len(stack) == 0
-}
-```
-
-```go
-package main
-
-import "fmt"
-
-func main() {
-	testCases := []string{
-		"()",     // true
-		"()[]{}", // true
-		"(]",     // false
-		"([)]",   // false
-		"{[]}",   // true
-		"(",      // false
-		"",       // true (an empty string is technically balanced)
+		"",       // true
 	}
 
 	for _, tc := range testCases {
@@ -408,31 +334,137 @@ func IsValid(str string) bool {
 }
 ```
 
-#### Analysis
-**Expected Output:**
-```text
-Input: ()         Valid: true
-Input: ()[]{}     Valid: true
-Input: (]         Valid: false
-Input: ([)]       Valid: false
-Input: {[]}       Valid: true
-Input: (          Valid: false
-Input:            Valid: true
+### Solution 2: Switch Case
+```go
+func IsValidSwitch(str string) bool {
+	stack := make([]rune, 0, len(str))
+	for _, char := range str {
+		if char == '(' || char == '{' || char == '[' {
+			stack = append(stack, char)
+		} else {
+			switch char {
+			case '(', '{', '[':
+				stack = append(stack, char)
+			case ')':
+				if len(stack) == 0 || stack[len(stack)-1] != '(' {
+					return false
+				}
+			case '}':
+				if len(stack) == 0 || stack[len(stack)-1] != '{' {
+					return false
+				}
+			case ']':
+				if len(stack) == 0 || stack[len(stack)-1] != '[' {
+					return false
+				}
+			}
+			stack = stack[:len(stack)-1]
+		}
+	}
+	return len(stack) == 0
+}
 ```
 
-**Complexity:**
-- **Time:** O(N) where N is the length of the string.
-- **Space:** O(N) for the stack in the worst case.
+### Solution 3: Direct Map Check
+```go
+func IsValidMap(str string) bool {
+	pairs := map[rune]rune{
+		')': '(',
+		'}': '{',
+		']': '[',
+	}
+	stack := make([]rune, 0, len(str))
+	for _, char := range str {
+		if char == '(' || char == '{' || char == '[' {
+			stack = append(stack, char)
+		} else {
+			if len(stack) == 0 {
+				return false
+			}
+			opener := stack[len(stack)-1]
+			if opener != pairs[char] {
+				return false
+			}
+			stack = stack[:len(stack)-1]
+		}
+	}
+	return len(stack) == 0
+}
+```
+</details>
 
-**Performance:**
-- **Execution:** ~7.42 ns/op | 0 B/op
+
+#### Analysis
+- **Expected Output:** Matches expected boolean values for balanced strings.
+- **Complexity:**
+  - **Time:** O(N)
+  - **Space:** O(N)
+- **Performance:** ~7.42 ns/op | 0 B/op
+
+[Back to Top](#table-of-contents)
 
 ---
 
-## Data Structures (Strings, Arrays, Maps)
+### Squares of a Sorted Array
+Returns an array of the squares of each number, sorted in non-decreasing order.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func SortedSquare(arr []int) []int {
+	n := len(arr)
+	result := make([]int, n)
+	left, right := 0, n-1
+	for i := n - 1; i >= 0; i-- {
+		if abs(arr[left]) > abs(arr[right]) {
+			result[i] = arr[left] * arr[left]
+			left++
+		} else {
+			result[i] = arr[right] * arr[right]
+			right--
+		}
+	}
+	return result
+}
+
+func abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
+
+func main() {
+	fmt.Println("Sorted Array :: ", SortedSquare([]int{-4, -1, 0, 3, 10}))
+}
+```
+</details>
+
+#### Analysis
+- **Expected Output:** `Sorted Array ::  [0 1 9 16 100]`
+- **Complexity:**
+  - **Time:** O(N) (Two-pointer approach)
+  - **Space:** O(N) (Result array)
+- **Performance:** ~12.56 ns/op | 48 B/op
+
+[Back to Top](#table-of-contents)
+
+---
+
+## Data Structures
 
 ### Count Vowels & Consonants (Built-in)
-Uses `unicode` and `strings` packages.
+Uses `strings` and `unicode` packages to count vowels and consonants.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -460,26 +492,28 @@ func main() {
 	fmt.Println("Consonant are :: ", consonantCount)
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-Vowels are ::  13
-Consonant are ::  26
-```
+- **Expected Output:**
+  ```text
+  Vowels are ::  13
+  Consonant are ::  26
+  ```
+- **Complexity:**
+  - **Time:** O(N)
+  - **Space:** O(1)
+- **Performance:** ~140.1 ns/op (Slower due to package overhead)
 
-**Complexity:**
-- **Time:** O(N * M) (Where M is length of "aeiou", so effectively O(N)).
-- **Space:** O(1).
-
-**Performance:**
-- **Execution:** ~140.1 ns/op
-- **Note:** Slower than custom due to `strings` and `unicode` function overhead.
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Count Vowels & Consonants (Custom)
-Manual implementation without `strings` package helper for vowels.
+Optimized manual implementation without `strings` package.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -511,25 +545,28 @@ func isVowel(char rune) bool {
 	return char == 'a' || char == 'e' || char == 'i' || char == 'o' || char == 'u' || char == 'A' || char == 'E' || char == 'I' || char == 'O' || char == 'U'
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-Vowel count ::  5
-Consonant count ::  21
-```
+- **Expected Output:**
+  ```text
+  Vowel count ::  5
+  Consonant count ::  21
+  ```
+- **Complexity:**
+  - **Time:** O(N)
+  - **Space:** O(1)
+- **Performance:** ~44.7 ns/op (~3x faster than built-in approach)
 
-**Complexity:**
-- **Time:** O(N)
-- **Space:** O(1)
-
-**Performance:**
-- **Execution:** ~44.7 ns/op
-- **Efficiency:** ~3x faster than logic using `strings.ContainsRune`.
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Reverse Array
+Reverses an array in-place.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -549,25 +586,24 @@ func reverseArray(arr []int) []int {
 	return arr
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-Array ::  [1 2 3 4 5 6 7 8 9 10]
-Reverse of Array ::  [10 9 8 7 6 5 4 3 2 1]
-```
+- **Expected Output:** `Reverse of Array ::  [10 9 8 7 6 5 4 3 2 1]`
+- **Complexity:**
+  - **Time:** O(N)
+  - **Space:** O(1)
+- **Performance:** ~13.8 ns/op
 
-**Complexity:**
-- **Time:** O(N/2) -> O(N)
-- **Space:** O(1) (In-place swap)
-
-**Performance:**
-- **Execution:** ~13.8 ns/op
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Remove Duplicates from Slice
-Shows how to find unique values, count occurrences, and track indices of duplicates.
+Finds unique values, counts occurrences, and tracks indices of duplicates using maps.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -626,36 +662,28 @@ func duplicateElementsIndex(arr []int) map[int][]int {
 	return result
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-Unique Values ::  [1 2 3 4 5 12]
-Duplicate Values ::  map[1:2 2:2 3:3 4:3 5:3 12:2]
-...
-```
+- **Complexity:**
+  - **Time:** O(N)
+  - **Space:** O(N)
+- **Performance:** ~119.4 ns/op | 120 B/op
 
-**Complexity:**
-- **Time:** O(N) (Average case for map operations).
-- **Space:** O(N) (Map store).
-
-**Performance:**
-- **Execution:** ~119.4 ns/op | 120 B/op
+[Back to Top](#table-of-contents)
 
 ---
 
-## Structs & Sorting
-
 ### Sort Employees by Age & Name
-Sorts a struct slice by Age (primary) and Name (secondary).
+Custom sort implementation for struct slices.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
 
-import (
-	"fmt"
-	"employees" // Hypothetical package or inline struct
-)
+import "fmt"
 
 type Employees struct {
 	Id   int
@@ -683,26 +711,26 @@ func ManipulateEmpData(emps []Employees) []Employees {
 	return emps
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-[{1 Alok 19} {4 Satyendar 28} {3 Harshit 33} {2 Sonam 33}]
-```
+- **Expected Output:** `[{1 Alok 19} {4 Satyendar 28} {3 Harshit 33} {2 Sonam 33}]`
+- **Complexity:**
+  - **Time:** O(N^2) (Bubble Sort)
+  - **Space:** O(1)
+- **Performance:** ~29.4 ns/op (Small N=4)
 
-**Complexity:**
-- **Time:** O(N^2) (Bubble Sort implementation).
-- **Space:** O(1) (In-place sort).
-
-**Performance:**
-- **Execution:** ~29.4 ns/op (Small N=4)
+[Back to Top](#table-of-contents)
 
 ---
 
-## Concurrency (Goroutines & Channels)
+## Concurrency
 
 ### Odd/Even Numbers (Single Channel)
-Two goroutines communicating via a shared channel.
+Two goroutines communicating via a single unbuffered channel.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -743,24 +771,23 @@ func evenNums(ch chan int, wg *sync.WaitGroup) {
 	}
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-1
-2
-...
-10
-```
+- **Expected Output:** Prints 1 to 10 sequentially.
+- **Complexity:**
+  - **Time:** O(N)
+  - **Context Switching:** High due to ping-pong communication.
 
-**Complexity:**
-- **Time:** O(N) (Linear communication).
-- **Context Switching:** High due to unbuffered channel Ping-Pong.
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Odd/Even Numbers (Multiple Channels)
-Separate channels for odd and even numbers.
+Uses separate channels for odd and even numbers to separate concerns.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -802,21 +829,21 @@ func evenNums(oddCh, evenCh chan int, wg *sync.WaitGroup) {
 	}
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-1
-2
-...
-10
-```
-This pattern separates concerns by using dedicated channels for distinct signal paths.
+- **Expected Output:** Prints 1 to 10 sequentially.
+- **Note:** This pattern cleanly separates signal paths for different workers.
+
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Sum of Odd/Even Numbers
-Calculates sums in background goroutines.
+Calculates sums in background goroutines concurrently.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -865,21 +892,25 @@ func findNums(num int, odd, even chan int, wg *sync.WaitGroup) {
 	}
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-Sum of Odd Numbers ::  20
-Sum of Even Numbers ::  26
-```
-**Complexity:**
-- **Time:** O(N) concurrent.
-- Note: High overhead creating a goroutine per number (`go findNums`) for small workloads.
+- **Expected Output:**
+  ```text
+  Sum of Odd Numbers ::  20
+  Sum of Even Numbers ::  26
+  ```
+- **Complexity:** O(N) concurrent. High overhead for creating a goroutine per number for small datasets.
+
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Prime Numbers from Array
-Workers process array elements and send primes to a channel.
+Workers process array elements and send prime numbers to a results channel.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -926,22 +957,20 @@ func isPrime(n int) bool {
 	return true
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-2
-3
-5
-7
-11
-```
-*(Order may vary due to concurrency)*
+- **Expected Output:** Prints prime numbers (order may vary due to concurrency).
+
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Index of Prime Numbers
 Returns the index of prime numbers found in an array.
+
+<details>
+<summary><strong>View Solution</strong></summary>
 
 ```go
 package main
@@ -990,35 +1019,29 @@ func isPrime(n int) bool {
 	return true
 }
 ```
+</details>
 
 #### Analysis
-**Expected Output:**
-```text
-Prime Number ::  2  index in Array is ::  0
-Prime Number ::  7  index in Array is ::  3
-Prime Number ::  11  index in Array is ::  5
-Prime Number ::  13  index in Array is ::  6
-Prime Number ::  17  index in Array is ::  7
-```
+- **Expected Output:**
+  ```text
+  Prime Number ::  2  index in Array is ::  0
+  Prime Number ::  7  index in Array is ::  3
+  ...
+  ```
+
+[Back to Top](#table-of-contents)
 
 ---
 
 ### Synchronous vs Asynchronous Concepts
 
-**Synchronous programming** runs tasks one after another, with each task waiting for the previous one to finish—like following a recipe step-by-step. This makes the code predictable and simple to debug, but it can also lead to slowdowns if you have a task that takes a long time (like waiting for data from an external source).
-
-**Asynchronous programming** allows multiple tasks to start and run at the same time, without blocking each other—a bit like cooking several dishes simultaneously. The program doesn’t wait for one to finish before starting the next, leading to better performance and responsiveness, especially when tasks are slow or involve waiting (I/O, network requests).
-
-**In Go: Goroutines & Channels**
- - **Goroutines** let you run functions concurrently (asynchronously). Just put `go` in front of a function call.
- - **Channels** let those goroutines communicate safely, sending and receiving values so you can coordinate when things are ready.
-
-**Typical workflow:**
- - **Synchronous:** `task1(); task2(); task3();` — runs one-by-one.
- - **Asynchronous:** `go task1(); go task2(); go task3();` — all start at once, possibly finishing in any order.
- - With channels, you can wait for results or synchronize tasks.
+**Synchronous programming** runs tasks one after another, like following a recipe step-by-step.
+**Asynchronous programming** allows multiple tasks to run concurrently, improving performance for I/O-heavy operations.
 
 #### Synchronous Example
+<details>
+<summary><strong>View Solution</strong></summary>
+
 ```go
 package main
 
@@ -1039,8 +1062,12 @@ func main() {
 	fmt.Println("All tasks done synchronously")
 }
 ```
+</details>
 
 #### Asynchronous Example
+<details>
+<summary><strong>View Solution</strong></summary>
+
 ```go
 package main
 
@@ -1069,113 +1096,6 @@ func main() {
 	fmt.Println("All tasks done asynchronously")
 }
 ```
+</details>
 
-### Valid Parentheses
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func IsValid(str string) bool {
-	pairs := map[rune]rune{
-		')': '(',
-		']': '[',
-		'}': '{',
-	}
-	stack := []rune{}
-	for _, char := range str {
-		if char == '(' || char == '[' || char == '{' {
-			stack = append(stack, char)
-		} else {
-			if len(stack) == 0 {
-				return false
-			}
-			opener := stack[len(stack)-1]
-			if opener != pairs[char] {
-				return false
-			}
-			stack = stack[:len(stack)-1]
-		}
-	}
-	return len(stack) == 0
-}
-
-func main() {
-	fmt.Println(IsValid("()[]{}"))
-	fmt.Println(IsValid("(]"))
-	fmt.Println(IsValid("([)]"))
-	fmt.Println(IsValid("{[]}"))
-}
-```
-
-#### Analysis
-**Expected Output:**
-```text
-true
-false
-false
-true
-```
-
-**Time Complexity:** O(n) - We traverse the string once.
-**Space Complexity:** O(n) - In the worst case, we push all characters onto the stack.
-
-**Benchmark Results:**
-- **Execution Time:** ~92.78 ns/op
-- **Memory Usage:** 0 B/op (due to stack allocation on stack/small size not triggering heap allocs for small inputs in test)
-- **Allocations:** 0 allocs/op
-
-### Squares of a Sorted Array
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func SortedSquare(arr []int) []int {
-	n := len(arr)
-	result := make([]int, n)
-	left, right := 0, n-1
-	for i := n - 1; i >= 0; i-- {
-		if abs(arr[left]) > abs(arr[right]) {
-			result[i] = arr[left] * arr[left]
-			left++
-		} else {
-			result[i] = arr[right] * arr[right]
-			right--
-		}
-	}
-	return result
-}
-
-func abs(n int) int {
-	if n < 0 {
-		return -n
-	}
-	return n
-}
-
-func main() {
-	fmt.Println("Sorted Array :: ", SortedSquare([]int{-4, -1, 0, 3, 10}))
-}
-```
-
-#### Analysis
-**Expected Output:**
-```text
-Sorted Array ::  [0 1 9 16 100]
-```
-
-**Time Complexity:** O(n) - Single pass using two pointers.
-**Space Complexity:** O(n) - To store the result array.
-
-**Benchmark Results:**
-- **Execution Time:** ~12.56 ns/op
-- **Memory Usage:** 48 B/op
-- **Allocations:** 1 allocs/op
-
+[Back to Top](#table-of-contents)
