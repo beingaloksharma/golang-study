@@ -36,6 +36,7 @@ A comprehensive collection of Go exercises, algorithms, and data structures impl
     - [Concurrent Prime Checker (Worker Pool)](#concurrent-prime-checker-worker-pool)
     - [Concurrent Vowel Counter (Map-Reduce)](#concurrent-vowel-counter-map-reduce)
     - [Concurrent Merge Sort](#concurrent-merge-sort)
+    - [Atomic Counters (Sync/Atomic)](#atomic-counters-syncatomic)
 
 ---
 
@@ -1526,5 +1527,65 @@ func merge(left, right []int) []int {
 
 [Back to Top](#table-of-contents)
 
+---
 
+### Atomic Counters (Sync/Atomic)
+Demonstrates safe concurrent state modification using atomic operations instead of mutexes, avoiding race conditions.
 
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+	"sync/atomic"
+)
+
+func main() {
+	numbers := make([]int, 1000000)
+
+	for i := 0; i < 1000000; i++ {
+		numbers[i] = i
+	}
+
+	var totalCount int64
+	var globalIndex int64
+	var wg sync.WaitGroup
+
+	numGoroutines := 10000
+
+	for i := 0; i < numGoroutines; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				// Atomically increment index to pick a number
+				idx := atomic.AddInt64(&globalIndex, 1) - 1
+				if idx >= int64(len(numbers)) {
+					return
+				}
+				if numbers[idx]%2 == 0 {
+					// Atomically increment counter
+					atomic.AddInt64(&totalCount, 1)
+				}
+			}
+		}()
+	}
+
+	wg.Wait()
+	fmt.Printf("Total: %d\n", totalCount)
+}
+```
+</details>
+
+#### Analysis
+- **Expected Output:** `Total: 500000` (Exact count of even numbers).
+- **Complexity:**
+  - **Time:** O(N/P) where P is num goroutines.
+  - **Performance:** Atomic operations are generally faster than Mutex locks for simple counters but can suffer from cache contention under high load.
+
+[Back to Top](#table-of-contents)
+```
