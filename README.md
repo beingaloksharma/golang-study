@@ -253,6 +253,7 @@ func fibonacciSeries(n int) int {
 ### Length of Last Word
 Finds the length of the last word in a string, handling trailing spaces.
 
+#### Solution 1: Manual Iteration
 <details>
 <summary><strong>View Solution</strong></summary>
 
@@ -295,6 +296,53 @@ func lastWordLength(str string) int {
   - **Time:** O(N)
   - **Space:** O(1)
 - **Performance:** ~72.05 ns/op
+
+#### Solution 2: Strings Package
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	str := []string{
+		"Hello World",
+		"Hello World ",
+		"   Hello World",
+		"Gopher",
+		"          ",
+		"",
+		"Fly    me    to  the  moon",
+	}
+	for _, t := range str {
+		fmt.Printf("Input: %q -> Result: %d\n", t, LastwordCount(t))
+	}
+}
+
+func LastwordCount(str string) int {
+	words := strings.Fields(str)
+	if len(words) == 0 {
+		return 0
+	}
+	return len(words[len(words)-1])
+}
+```
+</details>
+
+#### Analysis
+- **Expected Output:**
+  ```text
+  Input: "Hello World" -> Result: 5
+  Input: "Fly    me    to  the  moon" -> Result: 4
+  ```
+- **Complexity:**
+  - **Time:** O(N)
+  - **Space:** O(N) (Allocates slice of words)
 
 [Back to Top](#table-of-contents)
 
