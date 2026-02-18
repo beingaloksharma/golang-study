@@ -37,6 +37,7 @@ A comprehensive collection of Go exercises, algorithms, and data structures impl
     - [Concurrent Vowel Counter (Map-Reduce)](#concurrent-vowel-counter-map-reduce)
     - [Concurrent Merge Sort](#concurrent-merge-sort)
     - [Atomic Counters (Sync/Atomic)](#atomic-counters-syncatomic)
+    - [Worker Pool (Job Processing)](#worker-pool-job-processing)
 
 ---
 
@@ -1636,4 +1637,81 @@ func main() {
   - **Performance:** Atomic operations are generally faster than Mutex locks for simple counters but can suffer from cache contention under high load.
 
 [Back to Top](#table-of-contents)
+
+---
+
+### Worker Pool (Job Processing)
+A generic worker pool implementation where workers process jobs concurrently.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+type Job struct {
+	ID int
+}
+
+func Worker(id int, jobs chan Job, results chan int) {
+	for job := range jobs {
+		fmt.Printf("Worker %d Processing Job %d\n", id, job.ID)
+		time.Sleep(time.Second) // Simulate expensive task
+		results <- job.ID * 2
+	}
+}
+
+func main() {
+	numJobs := 5
+	numWorkers := 3
+
+	// Buffered channels for jobs and results
+	jobs := make(chan Job, numJobs)
+	results := make(chan int, numJobs)
+
+	// Start Workers
+	for w := 1; w <= numWorkers; w++ {
+		go Worker(w, jobs, results)
+	}
+
+	// Send Jobs
+	for j := 1; j <= numJobs; j++ {
+		jobs <- Job{ID: j}
+	}
+	close(jobs) // Close jobs channel so workers know when to stop
+
+	// Collect Results
+	for a := 1; a <= numJobs; a++ {
+		fmt.Println("Result :: ", <-results)
+	}
+}
 ```
+</details>
+
+#### Analysis
+- **Expected Output:**
+  ```text
+  Worker 3 Processing Job 1
+  Worker 1 Processing Job 2
+  Worker 2 Processing Job 3
+  ...
+  Result ::  2
+  Result ::  4
+  Result ::  6
+  Result ::  8
+  Result ::  10
+  ```
+  *(Order of worker processing defines the output order)*
+- **Complexity:**
+  - **Time:** O(N/K) where N is jobs, K is workers.
+  - **Space:** O(N) for buffered channels.
+- **Benefits:**
+  - Limits concurrency to `numWorkers` to prevent resource exhaustion.
+  - Efficiently distributes work among available workers.
+
+[Back to Top](#table-of-contents)
