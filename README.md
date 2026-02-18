@@ -22,9 +22,11 @@ A comprehensive collection of Go exercises, algorithms, and data structures impl
     - [Reverse Array](#reverse-array)
     - [Remove Duplicates from Slice](#remove-duplicates-from-slice)
     - [Sort Employees by Age & Name](#sort-employees-by-age--name)
+    - [Slice Appending & Capacity Pitfalls](#slice-appending--capacity-pitfalls)
 - [Interfaces](#interfaces)
     - [Geometry Shape Pattern](#geometry-shape-pattern)
     - [Payment Method (Factory Pattern)](#payment-method-factory-pattern)
+    - [Nil Interface Gotcha](#nil-interface-gotcha)
 - [Concurrency](#concurrency)
     - [Odd/Even Numbers (Single Channel)](#oddeven-numbers-single-channel)
     - [Odd/Even Numbers (Multiple Channels)](#oddeven-numbers-multiple-channels)
@@ -39,6 +41,7 @@ A comprehensive collection of Go exercises, algorithms, and data structures impl
     - [Atomic Counters (Sync/Atomic)](#atomic-counters-syncatomic)
     - [Worker Pool (Job Processing)](#worker-pool-job-processing)
     - [Worker Pool (Unbuffered Channel)](#worker-pool-unbuffered-channel)
+    - [Goroutine Loop Variable Capture](#goroutine-loop-variable-capture)
 
 ---
 
@@ -811,6 +814,67 @@ func ManipulateEmpData(emps []Employees) []Employees {
 
 [Back to Top](#table-of-contents)
 
+
+---
+
+### Slice Appending & Capacity Pitfalls
+Demonstrates how appending to a slice can unintentionally modify the underlying array.
+
+#### Quiz
+What is the output of the following program?
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	a := []int{1, 2, 3}
+	b := a[:2]
+	b = append(b, 99)
+
+	fmt.Println(a)
+	fmt.Println(b)
+}
+```
+
+**Options:**
+- **A)** `[1 2 3]` and `[1 2 99]`
+- **B)** `[1 2 99]` and `[1 2 99]`
+- **C)** `[1 2 3]` and `[1 2 3 99]`
+- **D)** Compile error
+
+<details>
+<summary><strong>View Answer</strong></summary>
+
+**Correct Answer:** **B)** `[1 2 99]` and `[1 2 99]`
+
+**Explanation:**
+1. `a := []int{1, 2, 3}`: Creates a slice `a` with length 3 and capacity 3. The underlying array is `[1, 2, 3]`.
+2. `b := a[:2]`: Creates slice `b` pointing to the same backing array. `b` has length 2 and capacity 3.
+3. `b = append(b, 99)`:
+   - Since `b`'s capacity (3) is greater than its length (2), there is room for one more element.
+   - `append` does **not** allocate a new array. It modifies the existing backing array.
+   - The 3rd element of the backing array (originally `3`, which is `a[2]`) is overwritten with `99`.
+4. Both `a` and `b` share this modified backing array.
+   - `a` sees the full array: `[1 2 99]`.
+   - `b` sees the first 3 elements (indices 0-2): `[1 2 99]`.
+
+**How to avoid it?**
+Force a new backing array allocation when slicing if you intend to modify it independently:
+```go
+// Method 1: Append to nil
+b := append([]int(nil), a[:2]...)
+
+// Method 2: Make and Copy
+b := make([]int, 2)
+copy(b, a[:2])
+```
+
+</details>
+
+[Back to Top](#table-of-contents)
+
 ---
 
 ## Interfaces
@@ -935,6 +999,80 @@ func main() {
 - **Complexity:**
   - **Time:** O(1)
   - **Space:** O(1)
+
+[Back to Top](#table-of-contents)
+
+
+---
+
+### Nil Interface Gotcha
+Demonstrates a common pitfall where an interface holding a nil concrete value is not itself nil.
+
+#### Quiz
+What is the output of the following program?
+
+```go
+package main
+
+import "fmt"
+
+type MyError struct{}
+
+func (e *MyError) Error() string {
+	return "error"
+}
+
+func main() {
+	var e *MyError = nil
+	var err error = e
+
+	if err == nil {
+		fmt.Println("nil")
+	} else {
+		fmt.Println("not nil")
+	}
+}
+```
+
+**Options:**
+- **A)** `nil`
+- **B)** `not nil`
+- **C)** Panic
+- **D)** Compile error
+
+<details>
+<summary><strong>View Answer</strong></summary>
+
+**Correct Answer:** **B)** `not nil`
+
+**Explanation:**
+1. `var e *MyError = nil`: `e` is a `nil` pointer of type `*MyError`.
+2. `var err error = e`: `e` is assigned to `err`, which is an interface.
+3. In Go, an interface is a tuple: `(type, value)`.
+   - Here, `err` becomes `(*MyError, nil)`.
+   - The **type** is `*MyError` (not nil).
+   - The **value** is `nil`.
+4. An interface is `nil` **only if** both its type and value are `nil`.
+   - Since the type is present, `err != nil`.
+
+**The Rule:**
+> An interface is `nil` only if **BOTH** its type AND value are `nil`.
+
+**How to fix it?**
+Always return an explicit `nil` interface, or check for nil before assigning to the interface.
+
+```go
+// Senior-Level Fix: Explicitly check for nil
+func do() error {
+    var e *MyError = nil
+    if e == nil {
+        return nil
+    }
+    return e
+}
+```
+
+</details>
 
 [Back to Top](#table-of-contents)
 
@@ -1799,3 +1937,74 @@ func main() {
 - **Use Case:** When you need strict hand-off or want to prevent the job queue from growing indefinitely.
 
 [Back to Top](#table-of-contents)
+
+---
+
+### Goroutine Loop Variable Capture
+Demonstrates the behavior of loop variable capture in closures.
+
+#### Quiz
+What is the output of the following program (assuming Go versions < 1.22)?
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	for i := 0; i < 3; i++ {
+		go func() {
+			fmt.Println(i)
+		}()
+	}
+}
+```
+
+**Options:**
+- **A)** `0`, `1`, `2`
+- **B)** `3`, `3`, `3`
+- **C)** Random mix of `0`, `1`, `2`
+- **D)** Program will not compile
+
+<details>
+<summary><strong>View Answer</strong></summary>
+
+**Correct Answer:** **B) 3 3 3** *(For Go < 1.22)*
+
+**Explanation:**
+The goroutine captures the variable `i` itself, not its value at that iteration. By the time the goroutines execute:
+1. The loop has already finished.
+2. `i` has been incremented to `3`.
+3. All goroutines reference the same memory location.
+4. Thus, they all print `3`.
+
+> **Note:** In Go 1.22+, the loop variable semantics were changed to avoid this pitfall. Each iteration effectively gets its own variable, so the output would be `0`, `1`, `2` (in random order).
+
+
+#### How to Fix It Properly (Go < 1.22)
+
+**Option 1: Pass `i` as a parameter (Closure)**
+```go
+for i := 0; i < 3; i++ {
+    go func(i int) {
+        fmt.Println(i)
+    }(i)
+}
+```
+
+**Option 2: Shadow variable inside loop**
+```go
+for i := 0; i < 3; i++ {
+    i := i // Create a new 'i' for this iteration
+    go func() {
+        fmt.Println(i)
+    }()
+}
+```
+
+</details>
+
+[Back to Top](#table-of-contents)
+
