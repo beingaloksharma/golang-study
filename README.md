@@ -38,6 +38,7 @@ A comprehensive collection of Go exercises, algorithms, and data structures impl
     - [Concurrent Merge Sort](#concurrent-merge-sort)
     - [Atomic Counters (Sync/Atomic)](#atomic-counters-syncatomic)
     - [Worker Pool (Job Processing)](#worker-pool-job-processing)
+    - [Worker Pool (Unbuffered Channel)](#worker-pool-unbuffered-channel)
 
 ---
 
@@ -1713,5 +1714,88 @@ func main() {
 - **Benefits:**
   - Limits concurrency to `numWorkers` to prevent resource exhaustion.
   - Efficiently distributes work among available workers.
+
+[Back to Top](#table-of-contents)
+
+---
+
+### Worker Pool (Unbuffered Channel)
+A worker pool using **unbuffered channels**, where the sender blocks until a worker is ready to receive a job. This ensures strict synchronization.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+type Job struct {
+	ID int
+}
+
+func Worker(id int, jobs chan Job, results chan int) {
+	for job := range jobs {
+		fmt.Printf("Worker %d started job %d\n", id, job.ID)
+		time.Sleep(time.Second) // Simulate work
+		fmt.Printf("Worker %d finished job %d\n", id, job.ID)
+		results <- job.ID * 2
+	}
+}
+
+func main() {
+	numJobs := 5
+	numWorkers := 3
+
+	// Unbuffered channels
+	jobs := make(chan Job)
+	results := make(chan int)
+
+	// Start Workers
+	for w := 1; w <= numWorkers; w++ {
+		go Worker(w, jobs, results)
+	}
+
+	// Send jobs in a separate goroutine to prevent deadlock
+	go func() {
+		for j := 1; j <= numJobs; j++ {
+			jobs <- Job{ID: j} // Will block until a worker is ready
+		}
+		close(jobs)
+	}()
+
+	// Collect Results
+	for a := 1; a <= numJobs; a++ {
+		res := <-results
+		fmt.Printf("Result :: %d\n", res)
+	}
+}
+```
+</details>
+
+#### Analysis
+- **Expected Output:**
+  ```text
+  Worker 2 started job 2
+  Worker 3 started job 3
+  Worker 1 started job 1
+  Worker 1 finished job 1
+  Worker 3 finished job 3
+  Worker 1 started job 4
+  Result :: 2
+  Worker 2 finished job 2
+  Result :: 6
+  Result :: 4
+  Worker 3 started job 5
+  Worker 1 finished job 4
+  Result :: 8
+  Worker 3 finished job 5
+  Result :: 10
+  ```
+- **Key Difference:** unlike buffered channels, the `jobs <-` operation blocks if all workers are busy. The sending goroutine pauses execution until a worker becomes available.
+- **Use Case:** When you need strict hand-off or want to prevent the job queue from growing indefinitely.
 
 [Back to Top](#table-of-contents)
