@@ -39,6 +39,7 @@ A comprehensive collection of Go exercises, algorithms, and data structures impl
     - [Atomic Counters (Sync/Atomic)](#atomic-counters-syncatomic)
     - [Worker Pool (Job Processing)](#worker-pool-job-processing)
     - [Worker Pool (Unbuffered Channel)](#worker-pool-unbuffered-channel)
+    - [Concurrent Cache (sync.RWMutex)](#concurrent-cache-syncrwmutex)
 
 ---
 
@@ -1797,5 +1798,81 @@ func main() {
   ```
 - **Key Difference:** unlike buffered channels, the `jobs <-` operation blocks if all workers are busy. The sending goroutine pauses execution until a worker becomes available.
 - **Use Case:** When you need strict hand-off or want to prevent the job queue from growing indefinitely.
+
+[Back to Top](#table-of-contents)
+
+---
+
+### Concurrent Cache (sync.RWMutex)
+A thread-safe concurrent cache implementation using `sync.RWMutex` which allows multiple concurrent readers but exclusive writers, improving performance over a standard `sync.Mutex` in read-heavy scenarios.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+type Cache struct {
+	mu sync.RWMutex
+	m  map[string]string
+}
+
+func NewCache() *Cache {
+	return &Cache{
+		m: make(map[string]string),
+	}
+}
+
+// Set adds or updates a key
+func (c *Cache) Set(k, v string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.m[k] = v
+}
+
+// Get retrieves a key
+func (c *Cache) Get(k string) (string, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	val, ok := c.m[k]
+	return val, ok
+}
+
+// Delete removes a key safely
+func (c *Cache) Delete(k string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	delete(c.m, k)
+}
+
+func main() {
+	cache := NewCache()
+
+	cache.Set("A", "1")
+
+	if val, ok := cache.Get("A"); ok {
+		fmt.Println("Before Delete:", val)
+	}
+
+	cache.Delete("A")
+
+	if _, ok := cache.Get("A"); !ok {
+		fmt.Println("Key A deleted successfully")
+	}
+}
+```
+</details>
+
+#### Analysis
+- **Expected Output:**
+  ```text
+  Before Delete: 1
+  Key A deleted successfully
+  ```
 
 [Back to Top](#table-of-contents)
