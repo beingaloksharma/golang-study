@@ -300,7 +300,47 @@ func lastWordLength(str string) int {
   - **Space:** O(1)
 - **Performance:** ~72.05 ns/op
 
-#### Solution 2: Strings Package
+#### Solution 2: Strings Package (Basic)
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	str := "Hello World"
+	fmt.Println("Length of String is :: ", len(str))
+
+	strArray := strings.Fields(str)
+
+	if len(strArray) == 0 {
+		fmt.Println(0)
+		return
+	}
+
+	fmt.Println("Length of last word ::", len(strArray[len(strArray)-1]))
+}
+```
+</details>
+
+#### Analysis
+- **Expected Output:**
+  ```text
+  Length of String is ::  11
+  Length of last word ::  5
+  ```
+- **Complexity:**
+  - **Time:** O(N)
+  - **Space:** O(N)
+
+#### Solution 3: Strings Package (Advanced)
 <details>
 <summary><strong>View Solution</strong></summary>
 
@@ -1806,6 +1846,7 @@ func main() {
 ### Concurrent Cache (sync.RWMutex)
 A thread-safe concurrent cache implementation using `sync.RWMutex` which allows multiple concurrent readers but exclusive writers, improving performance over a standard `sync.Mutex` in read-heavy scenarios.
 
+#### Solution 1: Basic
 <details>
 <summary><strong>View Solution</strong></summary>
 
@@ -1874,5 +1915,81 @@ func main() {
   Before Delete: 1
   Key A deleted successfully
   ```
+
+#### Solution 2: Cache with Multiple Keys
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+type Cache struct {
+	mu sync.RWMutex
+	m  map[string]string
+}
+
+func NewCache() *Cache {
+	return &Cache{
+		m: make(map[string]string),
+	}
+}
+
+func (c *Cache) Set(k, v string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.m[k] = v
+}
+
+func (c *Cache) Delete(k string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	delete(c.m, k)
+}
+
+func (c *Cache) Get(k string) (string, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	val, ok := c.m[k]
+	return val, ok
+}
+
+func main() {
+	cache := NewCache()
+	cache.Set("A", "1")
+	cache.Set("B", "2")
+	cache.Set("C", "3")
+	cache.Set("D", "4")
+	if val, ok := cache.Get("A"); ok {
+		fmt.Println("Key found in Cache :: ", val)
+	}
+	cache.Delete("A")
+	if _, ok := cache.Get("A"); !ok {
+		fmt.Println("Key delete in Cache")
+	}
+	for key, val := range cache.m {
+		fmt.Println(key, " -- ", val)
+	}
+}
+```
+</details>
+
+#### Analysis
+- **Expected Output:**
+  ```text
+  Key found in Cache ::  1
+  Key delete in Cache
+  A  --  1
+  B  --  2
+  C  --  3
+  D  --  4
+  ```
+*(Note: Output order of keys B, C, D may vary)*
 
 [Back to Top](#table-of-contents)
