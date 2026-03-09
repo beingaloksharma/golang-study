@@ -22,6 +22,7 @@ This document explains arrays in detail including **definition, internal structu
 12. [Common Pitfalls](#12-common-pitfalls)
 13. [Practical Examples](#13-practical-examples)
 14. [Summary](#14-summary)
+15. [Difference Between Array and Slice](#15-difference-between-array-and-slice-in-go)
 
 ---
 
@@ -308,3 +309,25 @@ Important points about arrays:
 - Arrays store elements in **contiguous memory**.
 - Arrays are **rarely used directly** in Go.
 - **Slices** are built on top of arrays and are used more often.
+
+
+## 15. Difference Between Array and Slice in Go
+
+| Feature | Array | Slice |
+|---|---|---|
+| Definition | Fixed-size collection of elements | Dynamic-sized view over an array |
+| Size | Size is fixed at compile time | Size can grow or shrink |
+| Syntax | `[n]Type` | `[]Type` |
+| Example | `var arr [3]int` | `var s []int` |
+| Memory | Stores elements directly | References an underlying array |
+| Length | Fixed | Dynamic |
+| Capacity | Same as length | Can be greater than length |
+| Resizing | Cannot be resized | Can grow using `append()` |
+| Passing to Function | Passed by value (full copy) | Slice header copied but references same array |
+| Performance | Faster for fixed-size data | Slight overhead due to dynamic behavior |
+| Flexibility | Less flexible | More flexible |
+| Usage | Rarely used directly | Widely used in Go programs |
+| Built-in Functions | Only `len()` | `len()`, `cap()`, `append()`, `copy()` |
+| Underlying Data | Contains actual elements | Contains pointer, length, and capacity |
+| Memory Allocation | Fixed memory allocated | Memory can expand when needed |
+| Common Use Case | Fixed datasets (e.g., fixed matrix size) | Dynamic collections like lists, buffers |
