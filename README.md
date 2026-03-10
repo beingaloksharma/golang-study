@@ -25,6 +25,8 @@ This repository is organized by concepts to make learning Golang structured and 
 - **[Arrays](array.md)**: Complete guide on arrays, sizes, contiguity, and memory behavior.
 - **[Slices](slice.md)**: Dynamic arrays, slice internals, `make`, `append`, `len`/`cap`, memory layout, and `copy`.
 - **[Data Structures Implementation](data_structures.md)**: Counting vowels/consonants, array reversal, removing duplicates, custom sorting.
+- **[Memory Allocation with make()](make_slice_map.md)**: Slice vs Map allocation, capacity, and `make()` function internals.
+- **[Slice Append Internals](slice_append.md)**: How `append()` truly works, capacity, array reuse vs reallocation, and common interview traps.
 
 ### ⚡ Concurrency
 - **[Concurrency Basics & Advanced Patterns](concurrency.md)**: Goroutines, Channels, Map-Reduce, WaitGroups, Mutexes, Atomic Counters, Worker Pools, Concurrent Caches, and Merge Sort.
