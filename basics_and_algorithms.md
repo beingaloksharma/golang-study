@@ -221,7 +221,7 @@ package main
 import "fmt"
 
 func main() {
-	str := "Hello World                                                                                                                                          "
+	str := "Hello World"
 	fmt.Println("Length of String is :: ", len(str))
 	fmt.Println("Length of last Word :: ", lastWordLength(str))
 }
@@ -234,13 +234,14 @@ func lastWordLength(str string) int {
 		if str[i] == ' ' && length > 0 {
 			return length
 		} else {
-			if (str[i] >= 'A' && str[i] >= 'Z') || (str[i] >= 'a' && str[i] >= 'z') {
+			if (str[i] >= 'A' && str[i] <= 'Z') || (str[i] >= 'a' && str[i] <= 'z') {
 				length = length + 1
 			}
 		}
 	}
 	return length
 }
+
 ```
 </details>
 
