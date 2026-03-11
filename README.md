@@ -31,7 +31,8 @@ This repository is organized by concepts to make learning Golang structured and 
 - **[Slice Append Internals](slice_append.md)**: How `append()` truly works, capacity, array reuse vs reallocation, and common interview traps.
 
 ### ⚡ Concurrency
-- **[Concurrency Basics & Advanced Patterns](concurrency.md)**: Goroutines, Channels, Map-Reduce, WaitGroups, Mutexes, Atomic Counters, Worker Pools, Concurrent Caches, and Merge Sort.
+- **[Channels](channels.md)**: Channel basics, unbuffered vs buffered, directions, closing channels, range over channels, and common traps.
+- **[Concurrency Basics & Advanced Patterns](concurrency.md)**: Goroutines, Map-Reduce, WaitGroups, Mutexes, Atomic Counters, Worker Pools, Concurrent Caches, and Merge Sort.
 
 ---
 
@@ -58,3 +59,4 @@ Contributions, issues, and feature requests are welcome!
 
 ## 📝 License
 This project is [MIT](https://opensource.org/licenses/MIT) licensed.
+
