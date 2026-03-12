@@ -22,6 +22,7 @@ This repository is organized by concepts to make learning Golang structured and 
 - **[Closures](closures.md)**: Anonymous functions, variable capture, escape analysis, and loop closure caveats.
 - **[Structs](structs.md)**: Struct declaration, initialization, nesting, JSON tags, and memory layout.
 - **[Methods](methods.md)**: Methods in Go, Value vs Pointer receivers, method sets, and method chaining.
+- **[Escape Analysis](escape_analysis.md)**: Stack vs Heap allocation, compiler optimizations, and performance implications.
 
 ### 🏗 Data Structures
 - **[Arrays](array.md)**: Complete guide on arrays, sizes, contiguity, and memory behavior.
@@ -59,4 +60,3 @@ Contributions, issues, and feature requests are welcome!
 
 ## 📝 License
 This project is [MIT](https://opensource.org/licenses/MIT) licensed.
-
