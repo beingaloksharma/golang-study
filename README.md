@@ -54,6 +54,7 @@ This repository is organized by concepts to make learning Golang structured and 
 | **Worker Pools** | Job queues, Terminating workers | [worker_pool.md](worker_pool.md) |
 | **Rate Limiter** | Token Bucket, Middleware, Per-IP limits | [rate_limiter.md](rate_limiter.md) |
 | **Patterns** | Mutexes, Atomic Counters | [concurrency.md](concurrency.md) |
+| **Thread-Safe Cache** | RWMutex, Interface-based, Sharding | [cache.md](cache.md) |
 
 ---
 
