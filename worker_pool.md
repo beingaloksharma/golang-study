@@ -5,7 +5,10 @@
 - [Why Use Worker Pools?](#🚀-why-use-worker-pools)
 - [Real-World Use Cases](#📂-real-world-use-cases)
 - [Basic Implementation](#⚒-basic-implementation)
+- [Generic Worker Pool (Go 1.18+)](#🧩-generic-worker-pool-go-118)
 - [Production-Ready Implementation](#🛡-production-ready-implementation)
+- [Advanced: Error Handling with `errgroup`](#💣-advanced-error-handling-with-errgroup)
+- [Performance & Tuning](#⚡-performance--tuning)
 - [Interview Deep Dive](#🧠-interview-deep-dive)
 - [Resources](#📚-resources)
 
@@ -15,10 +18,25 @@
 A **Worker Pool** is a concurrency pattern where a fixed number of goroutines (workers) process tasks from a shared job queue (channel). This prevents resource exhaustion by limiting the number of active goroutines, regardless of the number of submitted tasks.
 
 ### Visual Flow
-```text
-Tasks → [ Job Queue (Channel) ] → [ Worker 1 ] → [ Results Channel (Optional) ]
-                                  [ Worker 2 ]
-                                  [ Worker N ]
+```mermaid
+graph LR
+    subgraph Jobs
+        J1[Job 1] --> JQ[Job Queue / Channel]
+        J2[Job 2] --> JQ
+        J3[Job N] --> JQ
+    end
+
+    subgraph "Worker Pool"
+        JQ --> W1[Worker 1]
+        JQ --> W2[Worker 2]
+        JQ --> W3[Worker N]
+    end
+
+    subgraph Results
+        W1 --> R1[Result 1]
+        W2 --> R2[Result 2]
+        W3 --> RN[Result N]
+    end
 ```
 
 ---
@@ -83,6 +101,69 @@ func main() {
     for a := 1; a <= numJobs; a++ {
         fmt.Println("Result:", <-results)
     }
+}
+```
+</details>
+
+---
+
+## 🧩 Generic Worker Pool (Go 1.18+)
+Using Generics allows you to create reusable worker pool logic that isn't tied to a specific data type.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+// Task is a generic wrapper for a function that returns a result
+type Task[T any, R any] struct {
+	ID   int
+	Data T
+	Func func(T) R
+}
+
+func genericWorker[T any, R any](id int, tasks <-chan Task[T, R], results chan<- R, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for t := range tasks {
+		fmt.Printf("Worker %d processing task %d\n", id, t.ID)
+		results <- t.Func(t.Data)
+	}
+}
+
+func main() {
+	tasks := make(chan Task[string, int], 10)
+	results := make(chan int, 10)
+	var wg sync.WaitGroup
+
+	// Start 3 workers
+	for i := 1; i <= 3; i++ {
+		wg.Add(1)
+		go genericWorker(i, tasks, results, &wg)
+	}
+
+	// Submit tasks
+	jobFunc := func(s string) int { return len(s) }
+	words := []string{"apple", "banana", "cherry", "date"}
+	for i, w := range words {
+		tasks <- Task[string, int]{ID: i, Data: w, Func: jobFunc}
+	}
+	close(tasks)
+
+	// Wait for workers in a separate goroutine to avoid blocking
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	for res := range results {
+		fmt.Println("Result:", res)
+	}
 }
 ```
 </details>
@@ -158,20 +239,91 @@ func main() {
 
 ---
 
+## 💣 Advanced: Error Handling with `errgroup`
+The `golang.org/x/sync/errgroup` package is the standard way to handle errors in concurrent workers. It returns the first non-nil error from any worker and can naturally handle context cancellation.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"golang.org/x/sync/errgroup"
+)
+
+func main() {
+	g, ctx := errgroup.WithContext(context.Background())
+	jobs := make(chan int, 10)
+
+	// Producer
+	g.Go(func() error {
+		defer close(jobs)
+		for i := 1; i <= 5; i++ {
+			select {
+			case jobs <- i:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+		}
+		return nil
+	})
+
+	// Workers
+	for w := 1; w <= 3; w++ {
+		wID := w
+		g.Go(func() error {
+			for j := range jobs {
+				if j == 4 {
+					return errors.New("boom! error in worker")
+				}
+				fmt.Printf("Worker %d: job %d\n", wID, j)
+			}
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		fmt.Printf("Encountered error: %v\n", err)
+	} else {
+		fmt.Println("Successfully finished all jobs")
+	}
+}
+```
+</details>
+
+---
+
+## ⚡ Performance & Tuning
+
+### Choosing the Number of Workers
+- **CPU-bound tasks**: Usually `runtime.NumCPU() + 1`. Spawning more workers than cores leads to excessive context switching.
+- **I/O-bound tasks**: (Network calls, DB queries) Can be much higher (tens or hundreds) because workers spend most of their time waiting for external systems.
+
+### Channel Selection
+- **Unbuffered Channels**: Provide strong synchronization but can cause "jitter" as the producer must wait for a worker to be ready.
+- **Buffered Channels**: Smoothens out production spikes but risks concealing latency issues if the buffer stays full (backpressure).
+
+---
+
 ## 🧠 Interview Deep Dive
 
 ### High-Level Explanation
-> "A Worker Pool is a concurrency pattern used to limit resource consumption. We maintain a set of long-lived goroutines that listen to a shared channel for work. This avoids the overhead of spawning a new goroutine for every single task, which could otherwise lead to memory exhaustion or API rate limiting issues."
+> "A Worker Pool is a concurrency pattern where a fixed set of goroutines (workers) consume tasks from a shared job queue (channel). This allows us to process many tasks concurrently while strictly limiting resource usage (CPU/Memory) and preventing system overload by capping the total number of active goroutines."
 
 ### Common Pitfalls
-- **Unbounded Queues**: Creating channels with massive buffers can lead to memory explosion if producers are much faster than workers.
-- **Stray Goroutines**: Forgetting to `close()` the jobs channel or handle context cancellation can cause workers to hang forever (goroutine leak).
-- **Race Conditions during Result Aggregation**: Using shared variables for results without atomics or mutexes.
+- **Unbounded Queues**: Creating channels with massive buffers can lead to memory explosion if producers outpace workers.
+- **Stray Goroutines**: Forgetting to `close()` the jobs channel or handle context cancellation leads to **goroutine leaks**.
+- **Race Conditions**: Sharing state across workers without using `sync.Mutex` or `atomic` package.
 
 ### Tips for Senior Engineers
-- **Backpressure**: Explain how bounded channels provide natural backpressure by blocking producers when the pool is full.
-- **Dynamic Scaling**: Mention that sophisticated pools can adjust the number of workers based on the current load.
-- **Error Handling**: Discuss how to propagate errors from workers back to the caller (e.g., using an error channel or `errgroup`).
+- **Backpressure**: Explain how bounded channels naturally block producers when workers are busy.
+- **Graceful Shutdown**: Always discuss `sync.WaitGroup` and `context.Context` for terminating workers cleanly.
+- **Error Propagation**: Mention `errgroup` for collecting and handling errors from multiple workers.
+- **Work Stealing**: (Advanced) Contrast custom worker pools with Go's internal runtime scheduler which uses work-stealing for its own M:N model.
 
 ---
 
@@ -179,6 +331,7 @@ func main() {
 - [Go by Example: Worker Pools](https://gobyexample.com/worker-pools)
 - [Go Concurrency Patterns (Rob Pike)](https://go.dev/blog/pipelines)
 - [Effective Go: Goroutines](https://go.dev/doc/effective_go#goroutines)
+- [Sync Package Documentation](https://pkg.go.dev/sync)
 
 ---
 [Back to Top](#worker-pool-pattern-👷‍♂️)
