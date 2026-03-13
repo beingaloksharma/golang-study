@@ -1,4 +1,29 @@
-## Concurrency
+# Concurrency Study Guide ⚡
+
+## 📌 Table of Contents
+- [Basic Patterns](#-basic-patterns)
+  - [Odd/Even Numbers (Single Channel)](#oddeven-numbers-single-channel)
+  - [Odd/Even Numbers (Multiple Channels)](#oddeven-numbers-multiple-channels)
+  - [Sum of Odd/Even Numbers](#sum-of-oddeven-numbers)
+  - [Prime Numbers from Array](#prime-numbers-from-array)
+  - [Index of Prime Numbers](#index-of-prime-numbers)
+- [Concepts](#-concepts)
+  - [Synchronous vs Asynchronous](#synchronous-vs-asynchronous-concepts)
+- [Advanced Patterns](#-advanced-concurrency-patterns)
+  - [Concurrent Prime Checker (Worker Pool)](#concurrent-prime-checker-worker-pool)
+  - [Concurrent Vowel Counter (Map-Reduce)](#concurrent-vowel-counter-map-reduce)
+  - [Concurrent Merge Sort](#concurrent-merge-sort)
+  - [Atomic Counters (Sync/Atomic)](#atomic-counters-syncatomic)
+  - [Worker Pool (Job Processing)](#worker-pool-job-processing)
+  - [Worker Pool (Unbuffered Channel)](#worker-pool-unbuffered-channel)
+- [State Management](#-state-management)
+  - [Concurrent Cache (sync.RWMutex)](#concurrent-cache-syncrwmutex)
+- [Cancellation & Timeouts](#-cancellation--timeouts)
+  - [Context Package](#context-package)
+
+---
+
+## 🏗 Basic Patterns
 
 ### Odd/Even Numbers (Single Channel)
 Two goroutines communicating via a single unbuffered channel.
@@ -977,6 +1002,17 @@ func (c *Cache) Get(k string) (string, bool) {
 	return val, ok
 }
 
+// GetAll returns a copy of the cache to avoid race conditions during iteration
+func (c *Cache) GetAll() map[string]string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	copyMap := make(map[string]string)
+	for k, v := range c.m {
+		copyMap[k] = v
+	}
+	return copyMap
+}
+
 func main() {
 	cache := NewCache()
 	cache.Set("A", "1")
@@ -990,7 +1026,9 @@ func main() {
 	if _, ok := cache.Get("A"); !ok {
 		fmt.Println("Key delete in Cache")
 	}
-	for key, val := range cache.m {
+	
+	// Safe iteration using GetAll()
+	for key, val := range cache.GetAll() {
 		fmt.Println(key, " -- ", val)
 	}
 }
@@ -1002,11 +1040,176 @@ func main() {
   ```text
   Key found in Cache ::  1
   Key delete in Cache
-  A  --  1
   B  --  2
   C  --  3
   D  --  4
   ```
 *(Note: Output order of keys B, C, D may vary)*
 
-[Back to Top](#table-of-contents)
+#### Solution 3: Cache with Interface
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+// You can edit this code!
+// Click here and start typing.
+// You can edit this code!
+// Click here and start typing.
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+type CacheStore interface {
+	Set(key string, value int)
+	Get(key string) (int, bool)
+	Delete(key string)
+}
+
+type Cache struct {
+	mu sync.RWMutex
+	m  map[string]int
+}
+
+func NewCache() *Cache {
+	return &Cache{
+		m: make(map[string]int),
+	}
+}
+
+func (c *Cache) Set(k string, v int) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.m[k] = v
+}
+
+func (c *Cache) Get(k string) (int, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	val, ok := c.m[k]
+	return val, ok
+}
+
+func (c *Cache) Delete(k string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	delete(c.m, k)
+}
+
+func main() {
+	var cache CacheStore = NewCache()
+	cache.Set("A", 1)
+	if val, ok := cache.Get("A"); ok {
+		fmt.Println("Found Value :: ", val)
+	}
+	cache.Delete("A")
+	if _, ok := cache.Get("A"); !ok {
+		fmt.Println("Not Found Value")
+	}
+}
+
+```
+</details>
+
+#### Analysis
+- **Expected Output:**
+  ```text
+  Found Value ::  1
+  Not Found Value
+  ```
+
+[Back to Top](#📌-table-of-contents)
+
+---
+
+## 🛑 Cancellation & Timeouts
+
+### Context Package
+The `context` package is essential for managing the lifecycle of goroutines, allowing for cancellation signals and deadlines to propagate through the system.
+
+#### Context with Timeout
+Demonstrates how to stop a goroutine if it takes too long.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"time"
+)
+
+func slowOperation(ctx context.Context) {
+	select {
+	case <-time.After(5 * time.Second):
+		fmt.Println("Operation completed")
+	case <-ctx.Done():
+		fmt.Println("Operation cancelled:", ctx.Err())
+	}
+}
+
+func main() {
+	// Create a context that expires after 2 seconds
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel() // Always call cancel to release resources
+
+	go slowOperation(ctx)
+
+	// Wait to see the result
+	time.Sleep(3 * time.Second)
+	fmt.Println("Main finished")
+}
+```
+</details>
+
+#### Context with Cancel
+Manual cancellation of multiple goroutines.
+
+<details>
+<summary><strong>View Solution</strong></summary>
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"time"
+)
+
+func worker(ctx context.Context, id int) {
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Printf("Worker %d stopping\n", id)
+			return
+		default:
+			fmt.Printf("Worker %d working...\n", id)
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
+}
+
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	for i := 1; i <= 3; i++ {
+		go worker(ctx, i)
+	}
+
+	time.Sleep(2 * time.Second)
+	fmt.Println("Cancelling all workers...")
+	cancel()
+
+	time.Sleep(1 * time.Second)
+	fmt.Println("Main finished")
+}
+```
+</details>
+
+[Back to Top](#📌-table-of-contents)
