@@ -11,13 +11,13 @@ Channels allow goroutines to send and receive data safely without explicit locks
 - [1️⃣ Channel Basics](#1️⃣-channel-basics)
 - [2️⃣ Unbuffered Channels (Synchronous)](#2️⃣-unbuffered-channels-synchronous)
 - [3️⃣ Buffered Channels (Asynchronous)](#3️⃣-buffered-channels-asynchronous)
-- [4️⃣ Channel Directions](#4️⃣-channel-directions)
-- [5️⃣ Closing Channels](#5️⃣-closing-channels)
-- [6️⃣ Range Over Channel](#6️⃣-range-over-channel)
-- [7️⃣ Common Channel Mistakes](#7️⃣-common-channel-mistakes)
-- [8️⃣ Channel Internals](#8️⃣-channel-internals)
-- [9️⃣ Real Use Cases](#9️⃣-real-use-cases)
-- [🔟 Interview Questions](#🔟-interview-questions)
+- [4️⃣ Select Statement](#4️⃣-select-statement)
+- [5️⃣ Channel Directions](#5️⃣-channel-directions)
+- [6️⃣ Closing & Range](#6️⃣-closing--range)
+- [7️⃣ Advanced Patterns](#7️⃣-advanced-patterns)
+- [8️⃣ Internals: Under the Hood](#8️⃣-internals-under-the-hood)
+- [9️⃣ Common Pitfalls & Mistakes](#9️⃣-common-pitfalls--mistakes)
+- [🔟 Interview Preparation](#🔟-interview-preparation)
 - [✅ Summary](#✅-summary)
 
 ---
@@ -28,7 +28,7 @@ A channel is a typed conduit through which goroutines communicate.
 
 **Syntax**
 ```go
-ch := make(chan Type)
+ch := make(chan int)
 ```
 
 **Example:**
@@ -48,63 +48,30 @@ func main() {
 }
 ```
 
-**Output:**
-```text
-10
-```
-
-**Explanation:**
-- `ch <- 10`  → send value
-- `<-ch`      → receive value
-
 [Back to Top](#table-of-contents)
 
 ---
 
 ## 2️⃣ Unbuffered Channels (Synchronous)
 
-Default channels are unbuffered.
+Default channels are unbuffered. Communication is synchronous: the sender waits until the receiver is ready, and vice versa.
 
-This means:
-- sender waits until receiver is ready
-- receiver waits until sender sends
-
-So communication is synchronous.
-
-**Example**
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	ch := make(chan int)
-
-	go func() {
-		fmt.Println("Sending")
-		ch <- 5
-		fmt.Println("Sent")
-	}()
-
-	fmt.Println("Receiving")
-	v := <-ch
-
-	fmt.Println("Received:", v)
-}
-```
-
-**Output:**
-```text
-Receiving
-Sending
-Sent
-Received: 5
-```
-
-**Key concept:**
 `send blocks until receive happens`
+
+### Flow Visualization
+```mermaid
+sequenceDiagram
+    participant G1 as Goroutine 1 (Sender)
+    participant CH as Unbuffered Channel
+    participant G2 as Goroutine 2 (Receiver)
+    
+    G1->>CH: Send Data
+    Note over G1,CH: Blocked (Waiting for Receiver)
+    G2->>CH: Receive Data
+    CH-->>G2: Hand over Data
+    Note over G1,G2: Transfer Complete
+    Note over G1: Resume Execution
+```
 
 [Back to Top](#table-of-contents)
 
@@ -112,329 +79,230 @@ Received: 5
 
 ## 3️⃣ Buffered Channels (Asynchronous)
 
-Buffered channels allow sending without immediate receiver.
+Buffered channels allow sending values without an immediate receiver, up to a specified capacity.
 
 **Syntax:**
 ```go
 ch := make(chan int, capacity)
 ```
 
-**Example:**
-```go
-package main
-import "fmt"
-
-func main() {
-	ch := make(chan int, 2)
-
-	ch <- 1
-	ch <- 2
-
-	fmt.Println(<-ch)
-	fmt.Println(<-ch)
-}
-```
-
-**Output:**
-```text
-1
-2
-```
-
-Here: `capacity = 2`. So two sends can happen without blocking.
-
 **Blocking Behavior**
+- **Send**: Blocks when the buffer is **full**.
+- **Receive**: Blocks when the buffer is **empty**.
 
-| Operation | When it blocks |
-|---|---|
-| Send | buffer full |
-| Receive | buffer empty |
-
-**Example:**
-```go
-ch := make(chan int, 1)
-
-ch <- 1
-ch <- 2  // blocks
+### Flow Visualization
+```mermaid
+sequenceDiagram
+    participant G1 as Goroutine 1 (Sender)
+    participant CH as Buffered Channel (Cap 2)
+    participant G2 as Goroutine 2 (Receiver)
+    
+    G1->>CH: Send 1 (Enqueued)
+    Note over G1: No Blocking
+    G1->>CH: Send 2 (Enqueued)
+    Note over G1: No Blocking
+    G1->>CH: Send 3 (Buffer Full)
+    Note over G1,CH: Blocked (Waiting for Space)
+    G2->>CH: Receive 1
+    Note over G1: Resume (Space available)
 ```
 
 [Back to Top](#table-of-contents)
 
 ---
 
-## 4️⃣ Channel Directions
+## 4️⃣ Select Statement
 
-Channels can be restricted to send-only or receive-only.
+The `select` statement lets a goroutine wait on multiple communication operations. It is a fundamental pattern for multiplexing channels.
 
-**Send-only Channel**
-```go
-func send(ch chan<- int) {
-	ch <- 10
-}
-```
-`chan<- int`
-Meaning:
-- send allowed
-- receive not allowed
+- If multiple cases are ready, one is chosen **pseudo-randomly**.
+- If none are ready, it blocks (unless a `default` case exists).
 
-**Receive-only Channel**
-```go
-func receive(ch <-chan int) {
-	val := <-ch
-	fmt.Println(val)
-}
-```
-`<-chan int`
-Meaning:
-- receive allowed
-- send not allowed
+<details>
+<summary><strong>View Select Patterns</strong></summary>
 
-**Example**
 ```go
 package main
 
-import "fmt"
-
-func send(ch chan<- int) {
-	ch <- 100
-}
-
-func receive(ch <-chan int) {
-	fmt.Println(<-ch)
-}
+import (
+	"fmt"
+	"time"
+)
 
 func main() {
-	ch := make(chan int)
-	go send(ch)
-	receive(ch)
-}
-```
+	ch1 := make(chan string)
+	ch2 := make(chan string)
 
-**Output:**
-```text
-100
-```
+	go func() { time.Sleep(1 * time.Second); ch1 <- "one" }()
+	go func() { time.Sleep(2 * time.Second); ch2 <- "two" }()
 
-**Benefits:**
-- better API safety
-- clear communication intent
-
-[Back to Top](#table-of-contents)
-
----
-
-## 5️⃣ Closing Channels
-
-Channels can be closed using:
-```go
-close(ch)
-```
-
-Closing means: no more values will be sent.
-
-**Example**
-```go
-package main
-import "fmt"
-
-func main() {
-	ch := make(chan int)
-
-	go func() {
-		ch <- 1
-		ch <- 2
-		close(ch)
-	}()
-
-	for v := range ch {
-		fmt.Println(v)
-	}
-}
-```
-
-**Output:**
-```text
-1
-2
-```
-
-**Behavior After Closing**
-
-Receiving from closed channel:
-```go
-v, ok := <-ch
-```
-
-If closed:
-- `v` = zero value
-- `ok` = false
-
-**Example:**
-```go
-ch := make(chan int,1)
-
-ch <- 5
-close(ch)
-
-v1, ok1 := <-ch
-v2, ok2 := <-ch
-
-fmt.Println(v1, ok1)
-fmt.Println(v2, ok2)
-```
-
-**Output:**
-```text
-5 true
-0 false
-```
-
-[Back to Top](#table-of-contents)
-
----
-
-## 6️⃣ Range Over Channel
-
-`range` reads values until channel is closed.
-
-**Example:**
-```go
-package main
-import "fmt"
-
-func main() {
-	ch := make(chan int)
-
-	go func() {
-		for i := 1; i <= 5; i++ {
-			ch <- i
+	for i := 0; i < 2; i++ {
+		select {
+		case msg1 := <-ch1:
+			fmt.Println("Received", msg1)
+		case msg2 := <-ch2:
+			fmt.Println("Received", msg2)
+		case <-time.After(3 * time.Second):
+			fmt.Println("Timeout")
 		}
-		close(ch)
-	}()
-
-	for val := range ch {
-		fmt.Println(val)
 	}
 }
 ```
+</details>
 
-**Output:**
-```text
-1
-2
-3
-4
-5
-```
+### Common `select` Use Cases
+1. **Timeouts**: `case <-time.After(d):`.
+2. **Non-blocking checks**: `default:` case.
+3. **Graceful Shutdown**: `case <-done:`.
 
 [Back to Top](#table-of-contents)
 
 ---
 
-## 7️⃣ Common Channel Mistakes
+## 5️⃣ Channel Directions
 
-**1️⃣ Writing to closed channel**
+Channels can be restricted to send-only or receive-only for better type safety and API design.
+
 ```go
-close(ch)
-ch <- 10
-```
-Runtime panic: `panic: send on closed channel`
+// Send-only
+func producer(ch chan<- int) { ch <- 100 }
 
-**2️⃣ Closing channel twice**
+// Receive-only
+func consumer(ch <-chan int) { fmt.Println(<-ch) }
+```
+
+[Back to Top](#table-of-contents)
+
+---
+
+## 6️⃣ Closing & Range
+
+### Closing Channels
+- **Rule**: Only the sender should close a channel.
+- **Panic**: Sending to a closed channel or closing it twice causes a panic.
+- **Detection**: Use the `v, ok := <-ch` syntax. `ok` is `false` if the channel is empty and closed.
+
+### Range Over Channels
+`for v := range ch` reads values until the channel is closed.
+
 ```go
-close(ch)
-close(ch)
+func main() {
+    ch := make(chan int)
+    go func() {
+        for i := 1; i <= 3; i++ { ch <- i }
+        close(ch)
+    }()
+
+    for val := range ch {
+        fmt.Println(val)
+    }
+}
 ```
-Panic: `panic: close of closed channel`
 
-**3️⃣ Deadlock**
+[Back to Top](#table-of-contents)
 
-**Example:**
+---
+
+## 7️⃣ Advanced Patterns
+
+### Or-Done Channel
+Combines multiple `done` channels into one. If any of the input channels close, the returned channel closes.
+
 ```go
-ch := make(chan int)
-ch <- 10
+func or(channels ...<-chan interface{}) <-chan interface{} {
+    switch len(channels) {
+    case 0: return nil
+    case 1: return channels[0]
+    }
+    orDone := make(chan interface{})
+    go func() {
+        defer close(orDone)
+        switch len(channels) {
+        case 2:
+            select {
+            case <-channels[0]:
+            case <-channels[1]:
+            }
+        default:
+            select {
+            case <-channels[0]:
+            case <-or(append(channels[1:], orDone)...):
+            }
+        }
+    }()
+    return orDone
+}
 ```
-Error: `fatal error: all goroutines are asleep - deadlock!`
-Because no receiver exists.
 
-[Back to Top](#table-of-contents)
+### Done-Channel Pattern
+A reliable way to signal goroutines to clean up and exit.
 
----
-
-## 8️⃣ Channel Internals
-
-Channels internally maintain:
-- buffer queue
-- send queue
-- receive queue
-- mutex
-
-Simplified structure:
-```text
-channel
- ├── buffer
- ├── senders waiting
- └── receivers waiting
+```go
+func worker(done <-chan struct{}) {
+    for {
+        select {
+        case <-done:
+            return
+        default:
+            // Do work...
+        }
+    }
+}
 ```
 
 [Back to Top](#table-of-contents)
 
 ---
 
-## 9️⃣ Real Use Cases
+## 8️⃣ Internals: Under the Hood
 
-Channels are used for:
-- worker pools
-- pipelines
-- fan-in / fan-out
-- event streaming
-- task coordination
+Go channels are implemented as a circular buffer protected by a mutex. The runtime structure is called `hchan`.
+
+### The `hchan` Structure
+```mermaid
+classDiagram
+    class hchan {
+        +qcount uint (Items in buffer)
+        +dataqsiz uint (Buffer capacity)
+        +buf unsafe.Pointer (Circular buffer)
+        +elemsize uint16
+        +closed uint32
+        +recvq waitq (SudoGs waiting to recv)
+        +sendq waitq (SudoGs waiting to send)
+        +lock mutex
+    }
+```
+
+### Key Internal Components
+- **`buf`**: A circular array that stores data (only for buffered channels).
+- **`sendq` & `recvq`**: Linked lists of `SudoG` structures representing goroutines blocked on this channel.
+- **`lock`**: Every channel operation requires acquiring this mutex. **Channels are not lock-free.**
 
 [Back to Top](#table-of-contents)
 
 ---
 
-## 🔟 Interview Questions
+## 9️⃣ Common Pitfalls & Mistakes
+
+1. **Deadlock**: Sending to a channel without a concurrent receiver (for unbuffered channels).
+2. **Goroutine Leak**: A goroutine blocked on a channel that is never closed or read.
+3. **Panic**: Sending to a `nil` channel blocks forever; closing a `nil` channel panics.
+4. **Closing twice**: `panic: close of closed channel`.
+
+[Back to Top](#table-of-contents)
+
+---
+
+## 🔟 Interview Preparation
 
 **1️⃣ Difference between buffered and unbuffered channels?**
+Unbuffered is synchronous (rendezvous), while buffered is asynchronous until the buffer is full.
 
-| Feature | Unbuffered | Buffered |
-|---|---|---|
-| Communication | synchronous | asynchronous |
-| Capacity | 0 | >0 |
-| Blocking | sender waits | depends on buffer |
+**2️⃣ What happens when you read from a closed channel?**
+You receive the zero value of the channel's type. Use `v, ok := <-ch` to check if it's actually closed.
 
-**2️⃣ Who should close a channel?**
-Best practice:
-- sender closes the channel
-- receiver should NOT close
-
-**3️⃣ Can we detect closed channel?**
-Yes: `v, ok := <-ch`
-
-**🔥 Senior Go Interview Question**
-
-What will this print?
-```go
-func main() {
-	ch := make(chan int,1)
-	ch <- 1
-	close(ch)
-
-	fmt.Println(<-ch)
-	fmt.Println(<-ch)
-}
-```
-
-**Output:**
-```text
-1
-0
-```
-
-Because:
-- first receive → buffered value
-- second receive → zero value (channel closed)
+**🔥 Senior Level Question: Are channels lock-free?**
+No. They use a mutex (`hchan.lock`) for all operations. However, for most use cases, the overhead is negligible compared to the safety they provide.
 
 [Back to Top](#table-of-contents)
 
@@ -442,14 +310,10 @@ Because:
 
 ## ✅ Summary
 
-Channels provide safe communication between goroutines.
+Channels are the backbone of Go's concurrency model. They provide:
+- **Synchronization**: Coordinates goroutines without manual locks.
+- **Communication**: Safe data transfer.
+- **Memory Safety**: Encourages ownership transfer rather than shared access.
 
-Key concepts:
-- channel basics
-- unbuffered channels
-- buffered channels
-- channel directions
-- closing channels
-- range over channels
-
-[Back to Top](#table-of-contents)
+---
+[Back to Top](#channels)
