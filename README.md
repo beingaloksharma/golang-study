@@ -51,7 +51,9 @@ This repository is organized by concepts to make learning Golang structured and 
 | Topic | Description | Link |
 | :--- | :--- | :--- |
 | **Channels** | Buffered vs Unbuffered, Select, Range | [channels.md](channels.md) |
-| **Patterns** | Worker Pools, Mutexes, Atomic Counters | [concurrency.md](concurrency.md) |
+| **Worker Pools** | Job queues, Terminating workers | [worker_pool.md](worker_pool.md) |
+| **Rate Limiter** | Token Bucket, Middleware, Per-IP limits | [rate_limiter.md](rate_limiter.md) |
+| **Patterns** | Mutexes, Atomic Counters | [concurrency.md](concurrency.md) |
 
 ---
 
